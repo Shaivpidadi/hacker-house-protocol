@@ -1,32 +1,32 @@
 "use client";
 
+import { useDashboardSummary } from "@/hooks/use-hhp-data";
+import { useEnhancedListingsWithIPFS } from "@/hooks/use-enhanced-listings";
+import { formatUnits } from "ethers";
 import {
   Search,
   Menu,
-  Heart,
-  Info,
+  TrendingUp,
+  RefreshCw,
+  Home,
   MapPin,
   Users,
-  Home,
-  Compass,
-  Calendar,
-  User,
   Star,
-  Wifi,
-  Car,
-  AlarmSmokeIcon as Smoke,
-  Bath,
+  Heart,
+  Info,
 } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import Link from "next/link";
 import { usePrivy } from "@privy-io/react-auth";
 import { BottomNavigation } from "@/components/bottom-navigation";
-import { useDashboardSummary } from "@/hooks/use-hhp-data";
-import { useEnhancedListingsWithIPFS } from "@/hooks/use-enhanced-listings";
-import { formatEther, formatUnits } from "ethers";
-import { TrendingUp, RefreshCw } from "lucide-react";
+
+// Utility function to get fallback icon
+function getFallbackIcon(icon: any) {
+  if (icon && typeof icon === "function") return icon;
+  return Info; // Default fallback icon
+}
 
 export default function HomePage() {
   const { user, authenticated, ready } = usePrivy();
@@ -69,9 +69,10 @@ export default function HomePage() {
   const properties =
     enhancedListings?.map((listing: any) => ({
       id: listing.id,
-      title: listing.displayName,
-      location: listing.displayLocation,
-      price: parseFloat(formatUnits(listing.nightlyRate, 6)), // Changed from formatEther to formatUnits with 6 decimals for pyUSD
+      title:
+        listing.displayName || `Listing #${listing.listingId || listing.id}`,
+      location: listing.displayLocation || "Location TBD",
+      price: parseFloat(formatUnits(listing.nightlyRate || "0", 6)),
       rating: 4.85, // Default rating
       image: listing.metadata?.images?.[0] || "/property-palermo-1.png", // Use IPFS image if available
       amenities: [
@@ -79,7 +80,7 @@ export default function HomePage() {
           name: listing.requireProof ? "Proof Required" : "No Proof Required",
           icon: Info,
         },
-        { name: `Max ${listing.maxGuests} guests`, icon: Users },
+        { name: `Max ${listing.maxGuests || 0} guests`, icon: Users },
         { name: "Blockchain verified", icon: Home },
         {
           name: listing.hasMetadata ? "Has Metadata" : "No Metadata",
@@ -94,6 +95,10 @@ export default function HomePage() {
       ],
       isFavorite: false,
       hhpData: listing, // Store enhanced HHP data
+      metadata: listing.metadata, // Store IPFS metadata
+      privateData: listing.privateDataCid
+        ? { encPrivDataCid: listing.privateDataCid }
+        : undefined, // Store private data info
     })) || [];
 
   console.log({ properties });
@@ -114,8 +119,8 @@ export default function HomePage() {
             <div className="mb-4">
               <p className="text-gray-600">Welcome back,</p>
               <h2 className="text-xl font-semibold">
-                {user.email?.address?.split("@")[0] ||
-                  user.wallet?.address?.slice(0, 6) ||
+                {user?.email?.address?.split("@")[0] ||
+                  user?.wallet?.address?.slice(0, 6) ||
                   "User"}
                 !
               </h2>
@@ -183,23 +188,23 @@ export default function HomePage() {
             <div className="grid grid-cols-3 gap-3">
               <Card className="text-center p-3 bg-white/80 backdrop-blur-sm">
                 <div className="text-2xl font-bold text-blue-600">
-                  {dashboardData.listingCreatedBasics.length}
+                  {dashboardData?.listingCreatedBasics?.length || 0}
                 </div>
                 <div className="text-xs text-gray-600">Listings</div>
               </Card>
               <Card className="text-center p-3 bg-white/80 backdrop-blur-sm">
                 <div className="text-2xl font-bold text-green-600">
-                  {dashboardData.reservationCreateds.length}
+                  {dashboardData?.reservationCreateds?.length || 0}
                 </div>
                 <div className="text-xs text-gray-600">Reservations</div>
               </Card>
               <Card className="text-center p-3 bg-white/80 backdrop-blur-sm">
                 <div className="text-2xl font-bold text-purple-600">
-                  {dashboardData.reservationFundeds.length > 0
+                  {dashboardData?.reservationFundeds?.length > 0
                     ? formatUnits(
                         dashboardData.reservationFundeds.reduce(
                           (sum: bigint, fund: any) =>
-                            sum + BigInt(fund.amount || "0"),
+                            sum + BigInt(fund?.amount || "0"),
                           BigInt(0)
                         ),
                         6 // pyUSD has 6 decimals
@@ -232,9 +237,9 @@ export default function HomePage() {
         </div>
 
         <div className="space-y-4 mb-8">
-          {hackerHouses.map((house) => (
+          {hackerHouses?.map((house: any) => (
             <Card
-              key={house.id}
+              key={house?.id}
               className="rounded-2xl shadow-sm bg-white/80 backdrop-blur-sm hover:shadow-md transition-all duration-200 hover:scale-[1.02]"
             >
               <CardContent className="p-4">
@@ -242,20 +247,20 @@ export default function HomePage() {
                   <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-500 rounded-xl flex-shrink-0 shadow-sm"></div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-base mb-1">
-                      {house.title}
+                      {house?.title || "Untitled House"}
                     </h3>
                     <div className="flex items-center gap-1 mb-2">
                       <MapPin className="w-3 h-3 text-gray-400" />
                       <span className="text-sm text-gray-500">
-                        {house.location}
+                        {house?.location || "Location TBD"}
                       </span>
                       <Users className="w-3 h-3 text-gray-400 ml-2" />
                       <span className="text-sm text-gray-500">
-                        {house.attendees} members
+                        {house?.attendees || 0} members
                       </span>
                     </div>
                     <p className="text-sm text-gray-600 mb-3">
-                      {house.description}
+                      {house?.description || "No description available"}
                     </p>
                     <Button className="bg-white border border-gray-300 text-black hover:bg-gray-50 rounded-full px-6 h-8 text-sm transition-all duration-200 hover:scale-105">
                       Join
@@ -315,7 +320,10 @@ export default function HomePage() {
             !listingsError &&
             properties.length > 0 &&
             properties.map((property: any) => (
-              <Link key={property.id} href={`/property/${property.id}`}>
+              <Link
+                key={property.id}
+                href={`/property/${property?.hhpData?.listingId}`}
+              >
                 <Card className="relative overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] bg-white">
                   <div className="relative h-64 bg-gradient-to-br from-gray-800 to-gray-600">
                     <div className="absolute inset-0 bg-black/20"></div>
@@ -353,16 +361,23 @@ export default function HomePage() {
                         </div>
                       </div>
                       <div className="flex flex-wrap gap-2">
-                        {property.amenities.map(
-                          (amenity: any, index: number) => (
-                            <div
-                              key={index}
-                              className="flex items-center gap-1 px-3 py-1 bg-black/30 rounded-full text-xs backdrop-blur-sm"
-                            >
-                              <amenity.icon className="w-3 h-3" />
-                              <span>{amenity.name}</span>
-                            </div>
-                          )
+                        {property.amenities?.map(
+                          (amenity: any, index: number) => {
+                            const IconComponent = getFallbackIcon(
+                              amenity?.icon
+                            );
+                            return (
+                              <div
+                                key={index}
+                                className="flex items-center gap-1 px-3 py-1 bg-black/30 rounded-full text-xs backdrop-blur-sm"
+                              >
+                                <IconComponent className="w-3 h-3" />
+                                <span>
+                                  {amenity?.name || `Amenity ${index + 1}`}
+                                </span>
+                              </div>
+                            );
+                          }
                         )}
                       </div>
                     </div>

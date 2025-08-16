@@ -318,3 +318,40 @@ export const ENHANCED_LISTINGS_QUERY = gql`
     }
   }
 `;
+
+// Query for a single listing by listing ID
+export const LISTING_BY_ID_QUERY = gql`
+  query GetListingById($listingId: String!) {
+    listingCreatedBasics(where: { listingId: $listingId }) {
+      id
+      listingId
+      builder
+      paymentToken
+      nameHash
+      locationHash
+      nightlyRate
+      maxGuests
+      requireProof
+      blockNumber
+      blockTimestamp
+      transactionHash
+    }
+    listingMetadataURISets(where: { listingId: $listingId }) {
+      id
+      listingId
+      metadataURI
+      blockNumber
+      blockTimestamp
+      transactionHash
+    }
+    listingPrivateDataSets(where: { listingId: $listingId }) {
+      id
+      listingId
+      privDataHash
+      encPrivDataCid
+      blockNumber
+      blockTimestamp
+      transactionHash
+    }
+  }
+`;

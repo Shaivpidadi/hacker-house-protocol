@@ -99,6 +99,17 @@ export const hhpClient = {
   }) {
     return fetchFromSubgraph(ENHANCED_LISTINGS_QUERY, params);
   },
+
+  async getListingById(listingId: string) {
+    try {
+      const variables = { listingId };
+      const result = await graphqlClient.request(LISTING_BY_ID_QUERY, variables);
+      return result;
+    } catch (error) {
+      console.error('Error fetching listing by ID:', error);
+      throw error;
+    }
+  }
 };
 
 // Import the queries for use in components
@@ -113,4 +124,5 @@ import {
   RESERVATION_DETAILS_QUERY,
   DASHBOARD_SUMMARY_QUERY,
   ENHANCED_LISTINGS_QUERY,
+  LISTING_BY_ID_QUERY
 } from './graphql';

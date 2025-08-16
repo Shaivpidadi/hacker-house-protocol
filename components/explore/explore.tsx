@@ -51,9 +51,9 @@ export function Explore() {
 
     return {
       id: listing.id,
-      title: listing.name || `Listing #${listing.listingId}`, // Changed from listing.id to listing.listingId
+      title: listing.name || `Listing #${listing.listingId}`,
       location: listing.location || "Location TBD",
-      price: parseFloat(formatUnits(listing.nightlyRate, 6)), // Changed from formatEther to formatUnits
+      price: parseFloat(formatUnits(listing.nightlyRate, 6)),
       rating: 4.85, // Default rating since HHP doesn't have ratings yet
       image: "/property-palermo-1.png", // Default image
       amenities: [
@@ -68,8 +68,8 @@ export function Explore() {
       ],
       isFavorite: false,
       hhpData: listing, // Store original HHP data
-      metadata,
-      privateData,
+      metadata: metadata, // Store metadata for expanded view
+      privateData: privateData, // Store private data for expanded view
     };
   });
 

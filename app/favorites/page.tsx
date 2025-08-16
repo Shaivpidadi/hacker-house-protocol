@@ -1,100 +1,90 @@
-"use client"
+"use client";
 
-import { Heart, Star, MapPin, Trash2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { BottomNavigation } from "@/components/bottom-navigation"
-import Link from "next/link"
-import { useState } from "react"
+import { useFavorites } from "@/hooks/use-favorites";
+import { PropertyCard } from "@/components/explore/property-card";
+import { BottomNavigation } from "@/components/bottom-navigation";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Heart, Trash2, ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 export default function FavoritesPage() {
-  const [favorites, setFavorites] = useState([
-    {
-      id: 1,
-      title: "Room in Palermo",
-      location: "ETH Global Buenos Aires",
-      price: "$89/Day",
-      rating: 4.85,
-      image: "/property-palermo-1.png",
-      savedDate: "2 days ago",
-    },
-    {
-      id: 2,
-      title: "Hacker House Berlin",
-      location: "ETH Berlin Hackathon",
-      price: "$65/Day",
-      rating: 4.92,
-      image: "/property-palermo-2.png",
-      savedDate: "1 week ago",
-    },
-  ])
+  const { favorites, isLoaded, clearFavorites } = useFavorites();
 
-  const removeFavorite = (id: number) => {
-    setFavorites(favorites.filter((fav) => fav.id !== id))
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+        <div className="text-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading favorites...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Header */}
-      <div className="glass-card border-b border-border sticky top-0 z-10">
-        <div className="max-w-md mx-auto p-4">
-          <h1 className="text-2xl font-bold gradient-primary bg-clip-text text-transparent">Your Favorites</h1>
-          <p className="text-muted-foreground text-sm mt-1">{favorites.length} saved properties</p>
+      <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-10">
+        <div className="px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/explore">
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back
+                </Link>
+              </Button>
+              <div>
+                <h1 className="text-xl font-semibold">My Favorites</h1>
+                <p className="text-sm text-gray-600">
+                  {favorites.length} saved property
+                  {favorites.length !== 1 ? "ies" : "y"}
+                </p>
+              </div>
+            </div>
+            {favorites.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={clearFavorites}
+                className="text-red-600 border-red-200 hover:bg-red-50"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Clear All
+              </Button>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="max-w-md mx-auto p-4">
+      <div className="max-w-md mx-auto px-4 pb-24">
         {favorites.length === 0 ? (
           <div className="text-center py-16">
-            <Heart className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-muted-foreground mb-2">No favorites yet</h3>
-            <p className="text-muted-foreground mb-6">Start exploring and save properties you love!</p>
-            <Link href="/explore">
-              <Button className="gradient-primary text-primary-foreground rounded-full px-8 glass">
-                Explore Properties
-              </Button>
-            </Link>
+            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Heart className="w-12 h-12 text-gray-400" />
+            </div>
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">
+              No favorites yet
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Start exploring properties and add them to your favorites!
+            </p>
+            <Button asChild>
+              <Link href="/explore">Explore Properties</Link>
+            </Button>
           </div>
         ) : (
-          <div className="space-y-4">
-            {favorites.map((property) => (
-              <div
-                key={property.id}
-                className="glass-card rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300"
-              >
-                <div className="flex">
-                  <div className="w-24 h-24 gradient-secondary relative">
-                    <div className="absolute inset-0 bg-black/20"></div>
-                  </div>
-                  <div className="flex-1 p-4">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-semibold text-foreground">{property.title}</h3>
-                        <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
-                          <MapPin className="w-3 h-3" />
-                          {property.location}
-                        </div>
-                        <div className="flex items-center gap-4 mt-2">
-                          <span className="font-bold text-primary">{property.price}</span>
-                          <div className="flex items-center gap-1">
-                            <Star className="w-3 h-3 fill-chart-2 text-chart-2" />
-                            <span className="text-sm text-foreground">{property.rating}</span>
-                          </div>
-                        </div>
-                        <p className="text-xs text-muted-foreground mt-1">Saved {property.savedDate}</p>
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => removeFavorite(property.id)}
-                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+          <div className="space-y-4 pt-4">
+            {favorites.map((favorite) => (
+              <PropertyCard
+                key={favorite.id}
+                property={{
+                  ...favorite,
+                  isFavorite: true, // Force to show as favorite
+                }}
+              />
             ))}
           </div>
         )}
@@ -102,5 +92,5 @@ export default function FavoritesPage() {
 
       <BottomNavigation activeTab="Favorites" />
     </div>
-  )
+  );
 }

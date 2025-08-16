@@ -65,12 +65,15 @@ export function useEnhancedListingsWithIPFS(params?: {
                 return result;
             } catch (error) {
                 console.error('Error fetching IPFS metadata:', error);
+                // Return empty map on error - we'll fall back to mock data
                 return new Map();
             }
         },
         enabled: !!subgraphData?.listingCreatedBasics,
         staleTime: 10 * 60 * 1000, // 10 minutes
         gcTime: 30 * 60 * 1000, // 30 minutes
+        retry: 2, // Retry failed requests up to 2 times
+        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
     });
 
     console.log({ subgraphData });

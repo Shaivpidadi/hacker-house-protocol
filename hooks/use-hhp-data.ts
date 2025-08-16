@@ -90,6 +90,17 @@ export function useListingWithReservations(id: string, first?: number) {
     });
 }
 
+// Hook for fetching a single listing by listing ID
+export function useListingById(listingId: string) {
+    return useQuery({
+        queryKey: [...hhpQueryKeys.listing(listingId), 'byId'],
+        queryFn: () => hhpClient.getListingById(listingId),
+        enabled: !!listingId,
+        staleTime: 5 * 60 * 1000, // 5 minutes
+        gcTime: 10 * 60 * 1000, // 10 minutes
+    });
+}
+
 // Hooks for Reservations
 export function useReservations(params?: PaginationParams & { where?: ReservationFilter }) {
     return useQuery({
@@ -264,7 +275,7 @@ export function useEnhancedListing(id: string) {
 
     // Calculate enhanced data
     const totalReservations = reservations.length;
-    const totalRevenue = funding.reduce((sum, fund) => {
+    const totalRevenue = funding.reduce((sum: bigint, fund: any) => {
         return sum + BigInt(fund.amount || '0');
     }, BigInt(0)).toString();
 
@@ -335,11 +346,11 @@ export function useEnhancedReservation(id: string) {
     }
 
     // Calculate enhanced data
-    const totalFunded = funding.reduce((sum, fund) => {
+    const totalFunded = funding.reduce((sum: bigint, fund: any) => {
         return sum + BigInt(fund.amount || '0');
     }, BigInt(0)).toString();
 
-    const guestAddresses = guests.map(g => g.guest);
+    const guestAddresses = guests.map((g: any) => g.guest);
     const isActive = new Date(reservation.endDate * 1000) > new Date();
 
     // Calculate if fully funded (this would need to be compared with listing price)
