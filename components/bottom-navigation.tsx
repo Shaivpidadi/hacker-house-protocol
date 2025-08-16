@@ -8,6 +8,7 @@ import {
   User,
   LogOut,
   Wallet,
+  Smartphone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -63,6 +64,12 @@ export function BottomNavigation({
       label: "Hackstay",
       active: activeTab === "Hackstay",
       href: "/hackstay",
+    },
+    {
+      icon: Smartphone,
+      label: "HHP",
+      active: activeTab === "HHP",
+      href: "/hhp",
     },
     {
       icon: User,

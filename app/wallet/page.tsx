@@ -4,6 +4,7 @@ import WalletBalance from "@/components/wallet-balance";
 import WalletManager from "@/components/wallet-manager";
 import PrivyTest from "@/components/privy-test";
 import PrivyGuard from "@/components/privy-guard";
+import HhpActions from "@/components/hhp-actions";
 
 export const metadata: Metadata = {
   title: "Wallet Dashboard - CryptoReal",
@@ -32,6 +33,7 @@ export default function WalletPage() {
         <div className="lg:col-span-2 space-y-6">
           <PrivyTest />
           <WalletBalance />
+          <HhpActions />
           <WalletManager />
         </div>
       </div>
