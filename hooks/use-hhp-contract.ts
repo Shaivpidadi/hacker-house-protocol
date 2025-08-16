@@ -341,10 +341,78 @@ export function useHHPContract() {
         [isConnected, getContract, toast, connectedWallet]
     );
 
+    // Helper function to check if reservation was activated from transaction receipt
+    const checkActivationFromReceipt = async (contract: any, receipt: any): Promise<boolean> => {
+        try {
+            // Parse ReservationFunded events from the receipt
+            for (const log of receipt.logs) {
+                if (log.address.toLowerCase() !== contract.target.toLowerCase()) continue;
+                try {
+                    const parsed = contract.interface.parseLog({ topics: log.topics, data: log.data });
+                    if (parsed?.name === "ReservationFunded") {
+                        const activated = parsed.args.activated;
+                        console.log("ReservationFunded event:", {
+                            reservationId: parsed.args.reservationId?.toString(),
+                            payer: parsed.args.payer,
+                            amount: parsed.args.amount?.toString(),
+                            newTotalPaid: parsed.args.newTotalPaid?.toString(),
+                            activated: activated
+                        });
+                        return Boolean(activated);
+                    }
+                } catch (parseError) {
+                    console.log("Could not parse log:", parseError);
+                }
+            }
+            return false;
+        } catch (error) {
+            console.error("Error checking activation from receipt:", error);
+            return false;
+        }
+    };
+
+    // Get reservation details
+    const getReservationDetails = useCallback(
+        async (reservationId: number) => {
+            if (!isConnected) {
+                throw new Error("Wallet not connected");
+            }
+
+            try {
+                const contract = await getContract();
+                const reservation = await contract.reservations(BigInt(reservationId));
+                const listing = await contract.listings(BigInt(Number(reservation.listingId)));
+
+                return {
+                    reservation: {
+                        listingId: Number(reservation.listingId),
+                        renter: reservation.renter,
+                        startDate: Number(reservation.startDate),
+                        endDate: Number(reservation.endDate),
+                        totalDue: reservation.totalDue.toString(),
+                        amountPaid: reservation.amountPaid.toString(),
+                        active: reservation.active
+                    },
+                    listing: {
+                        builder: listing.builder,
+                        paymentToken: listing.paymentToken,
+                        nightlyRate: listing.nightlyRate.toString(),
+                        maxGuests: Number(listing.maxGuests),
+                        active: listing.active
+                    }
+                };
+            } catch (error) {
+                console.error("Error getting reservation details:", error);
+                throw new Error("Failed to get reservation details");
+            }
+        },
+        [isConnected, getContract]
+    );
+
     // Fund a reservation
     const fundReservation = useCallback(
         async (reservationId: number, amount: string) => {
-            if (!isConnected) {
+            if (!isConnected || !connectedWallet) {
                 toast({
                     title: "Wallet not connected",
                     description: "Please connect your wallet to fund a reservation",
@@ -357,39 +425,149 @@ export function useHHPContract() {
             setError(null);
 
             try {
-                const contract = await getContract();
+                // Get reservation and listing details
+                const details = await getReservationDetails(reservationId);
+                const { reservation, listing } = details;
 
-                // Convert amount to wei (assuming ETH payment)
-                const amountWei = ethers.parseEther(amount);
+                // Validate that the reservation exists and can be funded
+                // Note: reservations start as inactive (active=false) and become active when fully funded
+                if (reservation.active) {
+                    throw new Error("Reservation is already active (fully funded)");
+                }
 
-                const tx = await contract.fundReservation(
-                    BigInt(reservationId),
-                    amountWei,
-                    { value: amountWei } // Send ETH with the transaction
-                );
+                // Calculate remaining amount to pay (in token base units)
+                const totalDue = BigInt(reservation.totalDue);
+                const amountPaid = BigInt(reservation.amountPaid);
+                const remainingAmount = totalDue - amountPaid;
 
-                await tx.wait();
+                if (remainingAmount <= BigInt(0)) {
+                    throw new Error("Reservation is already fully funded");
+                }
 
-                toast({
-                    title: "Reservation funded!",
-                    description: `Successfully funded reservation ${reservationId}`,
+                // Use the remaining amount instead of user input to avoid overshoot
+                const fundingAmount = remainingAmount;
+
+                console.log("Funding calculation:", {
+                    totalDue: ethers.formatEther(totalDue),
+                    amountPaid: ethers.formatEther(amountPaid),
+                    remainingAmount: ethers.formatEther(remainingAmount),
+                    willFundExactly: ethers.formatEther(fundingAmount)
                 });
 
-                return true;
+                console.log("Funding reservation:", {
+                    reservationId,
+                    amount,
+                    listingId: reservation.listingId,
+                    paymentTokenAddress: listing.paymentToken,
+                    totalDue: reservation.totalDue,
+                    amountPaid: reservation.amountPaid,
+                    remainingAmount: ethers.formatEther(remainingAmount),
+                    fundingAmount: ethers.formatEther(fundingAmount)
+                });
+
+                // Check if it's ETH (address(0)) or an ERC-20 token
+                const isETH = listing.paymentToken === '0x0000000000000000000000000000000000000000';
+
+                const contract = await getContract();
+                let activated = false;
+
+                if (isETH) {
+                    // Handle ETH payment
+                    toast({
+                        title: "Funding Reservation",
+                        description: "Funding your reservation with ETH...",
+                    });
+
+                    const tx = await contract.fundReservation(
+                        BigInt(reservationId),
+                        fundingAmount,
+                        { value: fundingAmount } // Send ETH with the transaction
+                    );
+
+                    const receipt = await tx.wait();
+                    activated = await checkActivationFromReceipt(contract, receipt);
+                } else {
+                    // Handle ERC-20 token payment
+                    const wallet = await getEthersSigner(connectedWallet as any);
+
+                    // Create ERC-20 contract instance for approval
+                    const erc20Abi = [
+                        "function approve(address spender, uint256 value) returns (bool)",
+                        "function allowance(address owner, address spender) view returns (uint256)",
+                        "function balanceOf(address owner) view returns (uint256)"
+                    ];
+
+                    const erc20Contract = new ethers.Contract(listing.paymentToken, erc20Abi, wallet);
+
+                    // Check current allowance
+                    const currentAllowance = await erc20Contract.allowance(walletAddress, contract.target);
+
+                    if (currentAllowance < fundingAmount) {
+                        toast({
+                            title: "Approving Token",
+                            description: "Please approve the token transfer...",
+                        });
+
+                        // Approve the contract to spend tokens
+                        const approveTx = await erc20Contract.approve(contract.target, fundingAmount);
+                        await approveTx.wait();
+
+                        toast({
+                            title: "Token Approved",
+                            description: "Token approved successfully!",
+                        });
+                    }
+
+                    // Now fund the reservation
+                    toast({
+                        title: "Funding Reservation",
+                        description: "Funding your reservation...",
+                    });
+
+                    const tx = await contract.fundReservation(
+                        BigInt(reservationId),
+                        fundingAmount
+                    );
+
+                    const receipt = await tx.wait();
+                    activated = await checkActivationFromReceipt(contract, receipt);
+                }
+
+                toast({
+                    title: activated ? "Reservation Activated!" : "Reservation Funded!",
+                    description: activated
+                        ? `Reservation ${reservationId} is now active and ready for check-in!`
+                        : `Successfully funded reservation ${reservationId}. More funding may be needed to activate.`,
+                });
+
+                return { success: true, activated };
             } catch (err: any) {
-                const errorMessage = err.reason || err.message || "Failed to fund reservation";
-                setError(errorMessage);
+                // Enhanced error decoding
+                const raw = err?.data ?? err?.error?.data ?? err?.info?.error?.data ?? err?.transaction?.data;
+                const decoded = typeof raw === "string" ? decodeRevertString(raw) : null;
+                const errCode = typeof raw === "string" ? raw.slice(0, 10) : "";
+
+                const errorMap: Record<string, string> = {
+                    "0xf645eedf": "Invalid eligibility proof or signature",
+                    "0xfce698f7": "Invalid date format or business logic error",
+                    "0x08c379a0": decoded || "Contract Error(string)",
+                };
+
+                const friendly = decoded || errorMap[errCode] || err?.reason || err?.shortMessage || err?.message || "Failed to fund reservation";
+
+                console.error("FundReservation error", { msg: friendly, err, raw });
+                setError(friendly);
                 toast({
                     title: "Error",
-                    description: errorMessage,
+                    description: friendly,
                     variant: "destructive",
                 });
-                return false;
+                return { success: false, activated: false };
             } finally {
                 setIsLoading(false);
             }
         },
-        [isConnected, getContract, toast]
+        [isConnected, connectedWallet, getContract, walletAddress, toast, getReservationDetails]
     );
 
     // Add a guest to a reservation
@@ -514,6 +692,7 @@ export function useHHPContract() {
 
         // View functions
         getReservation,
+        getReservationDetails,
         getReservationGuests,
         getReservationPayers,
         getReservationSplits,

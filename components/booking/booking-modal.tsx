@@ -206,12 +206,15 @@ export function BookingModal({
     if (!reservationId) return;
 
     try {
-      const success = await fundReservation(
-        reservationId,
-        totalCost.toString()
-      );
-      if (success) {
-        setCurrentStep(4);
+      const result = await fundReservation(reservationId, totalCost.toString());
+      if (result && typeof result === "object" && result.success) {
+        if (result.activated) {
+          // Reservation is now active, show success step
+          setCurrentStep(4);
+        } else {
+          // Funded but not yet activated, might need more funding
+          setCurrentStep(4);
+        }
       }
     } catch (err) {
       console.error("Failed to fund reservation:", err);
