@@ -25,6 +25,7 @@ export function useWallet() {
     } = usePrivy();
 
     const walletAddress = useMemo(() => user?.wallet?.address, [user?.wallet?.address]);
+    const connectedWallet = useMemo(() => user?.wallet, [user?.wallet]);
 
     const isConnected = useMemo(() => ready && authenticated, [ready, authenticated]);
 
@@ -178,6 +179,7 @@ export function useWallet() {
         authenticated,
         user,
         walletAddress,
+        connectedWallet,
         isConnected,
         accountCount,
         canRemoveAccount,

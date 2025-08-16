@@ -27,6 +27,8 @@ import {
 import { useWallet } from "@/hooks/use-wallet";
 import { formatAddress } from "@/lib/utils";
 import { formatUnits } from "ethers";
+import { NetworkStatus } from "@/components/ui/network-status";
+import { useToast } from "@/hooks/use-toast";
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -53,6 +55,7 @@ export function BookingModal({
   const { isConnected, connectWallet, walletAddress } = useWallet();
   const { createReservation, fundReservation, isLoading, error } =
     useHHPContract();
+  const { toast } = useToast();
 
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
@@ -64,8 +67,8 @@ export function BookingModal({
   const [currentStep, setCurrentStep] = useState(1);
   const [reservationId, setReservationId] = useState<number | null>(null);
 
-  // Calculate total cost
-  const totalCost = nights * parseFloat(nightlyRate);
+  // Calculate total cost (6 decimal places)
+  const totalCost = nights * parseFloat(formatUnits(nightlyRate || "0", 6));
   const costPerPerson = totalCost / Math.max(guests.length + 1, 1);
 
   // Calculate nights when dates change
@@ -116,20 +119,47 @@ export function BookingModal({
 
     // For now, we'll create a mock eligibility proof
     // In production, this should come from your backend/verifier
+    // Note: This mock signature will fail EIP-712 verification
     const mockProof: EligibilityProof = {
-      expiry: Math.floor(Date.now() / 1000) + 3600, // 1 hour from now
+      expiry: Math.floor(Date.now() / 1000) + 300, // 5 minutes from now (within 600s TTL limit)
       nonce: Math.floor(Math.random() * 1000000),
-      sig: "0x" + "0".repeat(130), // Mock signature
+      sig: "0x" + "0".repeat(132), // Mock signature (65 bytes = 130 hex chars + 0x prefix)
     };
 
     if (!walletAddress) {
       throw new Error("Wallet address not available");
     }
 
+    // Validate dates are not too far in the future
+    const now = Date.now();
+    const maxFutureDate = now + 30 * 24 * 60 * 60 * 1000; // 30 days from now
+
+    if (
+      startDate.getTime() > maxFutureDate ||
+      endDate.getTime() > maxFutureDate
+    ) {
+      toast({
+        title: "Invalid dates",
+        description: "Please select dates within the next 30 days",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate end date is after start date
+    if (endDate.getTime() <= startDate.getTime()) {
+      toast({
+        title: "Invalid dates",
+        description: "End date must be after start date",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const args: CreateReservationArgs = {
       listingId: parseInt(listingId),
-      startDate: startDate.getTime(),
-      endDate: endDate.getTime(),
+      startDate: startDate.getTime(), // Keep as milliseconds, will be converted in hook
+      endDate: endDate.getTime(), // Keep as milliseconds, will be converted in hook
       nights,
       payers: [walletAddress, ...guests.map((g) => g.address)], // Bookers + guests
       bps: [
@@ -137,6 +167,22 @@ export function BookingModal({
         ...guests.map(() => Math.floor(10000 / (guests.length + 1))),
       ], // Split evenly
     };
+
+    console.log("About to create reservation with TTL:", {
+      expiry: mockProof.expiry,
+      expiryTime: new Date(mockProof.expiry * 1000).toISOString(),
+      currentTime: new Date().toISOString(),
+      ttlSeconds: mockProof.expiry - Math.floor(Date.now() / 1000),
+    });
+
+    console.log("Reservation arguments:", {
+      listingId: args.listingId,
+      startDate: new Date(args.startDate).toISOString(),
+      endDate: new Date(args.endDate).toISOString(),
+      nights: args.nights,
+      payers: args.payers,
+      bps: args.bps,
+    });
 
     try {
       const id = await createReservation(args, mockProof);
@@ -146,6 +192,13 @@ export function BookingModal({
       }
     } catch (err) {
       console.error("Failed to create reservation:", err);
+      // Show user-friendly error
+      toast({
+        title: "Reservation Failed",
+        description:
+          "The smart contract rejected the transaction. Check console for details.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -189,6 +242,7 @@ export function BookingModal({
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Book Property</DialogTitle>
+          <NetworkStatus className="mt-2" />
         </DialogHeader>
 
         {currentStep === 1 && (

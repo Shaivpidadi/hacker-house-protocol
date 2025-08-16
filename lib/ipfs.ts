@@ -27,7 +27,7 @@ export function getPinataUrl(ipfsUri: string): string {
             console.warn(`Invalid IPFS CID format: ${cid}`);
             return '';
         }
-        // Try Pinata first, fallback to Cloudflare
+        // Use Pinata gateway
         return `https://gateway.pinata.cloud/ipfs/${cid}`;
     }
 
@@ -37,7 +37,7 @@ export function getPinataUrl(ipfsUri: string): string {
             console.warn(`Invalid IPFS CID format: ${ipfsUri}`);
             return '';
         }
-        // Try Pinata first, fallback to Cloudflare
+        // Use Pinata gateway
         return `https://gateway.pinata.cloud/ipfs/${ipfsUri}`;
     }
 
@@ -56,12 +56,12 @@ export function getFallbackIPFSUrl(ipfsUri: string): string {
     if (ipfsUri.startsWith('ipfs://')) {
         const cid = ipfsUri.replace('ipfs://', '');
         if (!isValidCID(cid)) return '';
-        return `https://cloudflare-ipfs.com/ipfs/${cid}`;
+        return `https://ipfs.io/ipfs/${cid}`;
     }
 
     if (ipfsUri.startsWith('Qm') || ipfsUri.startsWith('bafy')) {
         if (!isValidCID(ipfsUri)) return '';
-        return `https://cloudflare-ipfs.com/ipfs/${ipfsUri}`;
+        return `https://ipfs.io/ipfs/${ipfsUri}`;
     }
 
     return ipfsUri;
@@ -69,9 +69,13 @@ export function getFallbackIPFSUrl(ipfsUri: string): string {
 
 // Validate IPFS CID format
 function isValidCID(cid: string): boolean {
-    // Basic CID validation - Qm (v0) or bafy (v1)
-    const cidPattern = /^(Qm[1-9A-HJ-NP-Za-km-z]{44}|bafy[a-z2-7]{55})$/;
-    return cidPattern.test(cid);
+    // CID validation for both v0 and v1 formats
+    // v0: Qm + 44 base58 characters
+    // v1: bafy/bafkrei/bafkreia + base32 characters (variable length)
+    const cidV0Pattern = /^Qm[1-9A-HJ-NP-Za-km-z]{44}$/;
+    const cidV1Pattern = /^baf[a-z2-7]{4,}$/;
+
+    return cidV0Pattern.test(cid) || cidV1Pattern.test(cid);
 }
 
 // Fetch metadata from IPFS
@@ -113,13 +117,22 @@ export async function fetchIPFSMetadata(ipfsUri: string): Promise<IPFSMetadata |
     }
 }
 
-// Custom fetch with timeout implementation
+// Custom fetch with timeout implementation and Pinata authentication
 async function fetchWithTimeout(url: string, timeoutMs: number): Promise<Response> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
-        const response = await fetch(url, { signal: controller.signal });
+        // Add Pinata JWT token if available and using Pinata gateway
+        const headers: HeadersInit = {};
+        if (url.includes('gateway.pinata.cloud') && process.env.NEXT_PUBLIC_PINATA_JWT) {
+            headers['Authorization'] = `Bearer ${process.env.NEXT_PUBLIC_PINATA_JWT}`;
+        }
+
+        const response = await fetch(url, {
+            signal: controller.signal,
+            headers
+        });
         clearTimeout(timeoutId);
         return response;
     } catch (error) {

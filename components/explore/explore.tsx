@@ -32,6 +32,19 @@ export function Explore() {
   const metadataSets = data?.listingMetadataURISets || [];
   const privateDataSets = data?.listingPrivateDataSets || [];
 
+  // Debug: Log the first listing's nightlyRate to see the format
+  if (listings.length > 0) {
+    console.log("First listing nightlyRate:", listings[0].nightlyRate);
+    console.log(
+      "Formatted price (8 decimals):",
+      formatUnits(listings[0].nightlyRate, 8)
+    );
+    console.log(
+      "Expected price for 15000000000:",
+      formatUnits("15000000000", 8)
+    );
+  }
+
   // Transform HHP listings to property format for existing PropertyCard component
   const properties = listings
     .filter((listing: any) => {
@@ -60,7 +73,7 @@ export function Explore() {
         id: listing.id,
         title: listing.name || `Listing #${listing.listingId}`,
         location: listing.location || "Location TBD",
-        price: parseFloat(formatUnits(listing.nightlyRate, 6)),
+        price: parseFloat(formatUnits(listing.nightlyRate, 6)), // 6 decimal places
         rating: 4.85, // Default rating since HHP doesn't have ratings yet
         image: "/property-palermo-1.png", // Default image
         amenities: [

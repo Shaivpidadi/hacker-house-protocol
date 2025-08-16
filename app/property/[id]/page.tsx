@@ -28,6 +28,7 @@ import { useListingById } from "@/hooks/use-hhp-data";
 import { useFavorites } from "@/hooks/use-favorites";
 import { formatUnits } from "ethers";
 import { formatAddress } from "@/lib/utils";
+import { fetchIPFSMetadata, IPFSMetadata } from "@/lib/ipfs";
 import { BookingModal } from "@/components/booking/booking-modal";
 
 // Type definitions for the listing data
@@ -82,6 +83,8 @@ export default function PropertyDetailPage() {
   const listingId = params.id as string; // This will be "1", "2", "3", etc.
   const [isFavorite, setIsFavorite] = useState(false);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [ipfsMetadata, setIpfsMetadata] = useState<IPFSMetadata | null>(null);
+  const [isLoadingMetadata, setIsLoadingMetadata] = useState(false);
   const { toggleFavorite, isFavorite: checkIsFavorite } = useFavorites();
 
   // Fetch listing data by listing ID
@@ -104,6 +107,34 @@ export default function PropertyDetailPage() {
       setIsFavorite(checkIsFavorite(listing.id));
     }
   }, [listingData, checkIsFavorite]);
+
+  // Fetch IPFS metadata when metadata URI is available
+  useEffect(() => {
+    const fetchMetadata = async () => {
+      if (
+        listingData?.listingMetadataURISets?.[0]?.metadataURI &&
+        !ipfsMetadata
+      ) {
+        setIsLoadingMetadata(true);
+        try {
+          const metadataUri = listingData.listingMetadataURISets[0].metadataURI;
+          console.log("Fetching IPFS metadata from:", metadataUri);
+
+          const metadata = await fetchIPFSMetadata(metadataUri);
+          if (metadata) {
+            setIpfsMetadata(metadata);
+            console.log("IPFS metadata fetched successfully:", metadata);
+          }
+        } catch (error) {
+          console.error("Failed to fetch IPFS metadata:", error);
+        } finally {
+          setIsLoadingMetadata(false);
+        }
+      }
+    };
+
+    fetchMetadata();
+  }, [listingData, ipfsMetadata]);
 
   const handleFavoriteToggle = () => {
     if (listingData?.listingCreatedBasics?.[0]) {
@@ -165,6 +196,8 @@ export default function PropertyDetailPage() {
   const privateData = listingData.listingPrivateDataSets?.[0];
   const price = parseFloat(formatUnits(listing.nightlyRate || "0", 6));
 
+  console.log({ listing, metadata, privateData, ipfsMetadata });
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       {/* Header */}
@@ -209,11 +242,11 @@ export default function PropertyDetailPage() {
           {/* Property Title Overlay */}
           <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/80 to-transparent">
             <h1 className="text-2xl font-bold text-white mb-2">
-              HHP Listing #{listing.listingId}
+              {ipfsMetadata?.name || `HHP Listing #${listing.listingId}`}
             </h1>
             <div className="flex items-center gap-2 text-white/90">
               <MapPin className="w-4 h-4" />
-              <span>Location TBD</span>
+              <span>{ipfsMetadata?.location || "Location TBD"}</span>
             </div>
           </div>
         </div>
@@ -304,12 +337,74 @@ export default function PropertyDetailPage() {
               <CardTitle>IPFS Metadata</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-gray-600 mb-3">
-                This property has metadata stored on IPFS.
-              </p>
-              <div className="text-xs font-mono bg-gray-100 p-2 rounded break-all">
-                URI: {metadata.metadataURI}
-              </div>
+              {isLoadingMetadata ? (
+                <div className="text-center py-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto mb-2"></div>
+                  <p className="text-sm text-gray-600">
+                    Loading metadata from IPFS...
+                  </p>
+                </div>
+              ) : ipfsMetadata ? (
+                <div className="space-y-4">
+                  {ipfsMetadata.name && (
+                    <div>
+                      <span className="text-sm text-gray-600">Name</span>
+                      <p className="font-medium">{ipfsMetadata.name}</p>
+                    </div>
+                  )}
+                  {ipfsMetadata.location && (
+                    <div>
+                      <span className="text-sm text-gray-600">Location</span>
+                      <p className="font-medium">{ipfsMetadata.location}</p>
+                    </div>
+                  )}
+                  {ipfsMetadata.description && (
+                    <div>
+                      <span className="text-sm text-gray-600">Description</span>
+                      <p className="text-sm">{ipfsMetadata.description}</p>
+                    </div>
+                  )}
+                  {ipfsMetadata.images && ipfsMetadata.images.length > 0 && (
+                    <div>
+                      <span className="text-sm text-gray-600">Images</span>
+                      <div className="flex gap-2 mt-2">
+                        {ipfsMetadata.images.map(
+                          (image: string, index: number) => (
+                            <img
+                              key={index}
+                              src={
+                                image.startsWith("ipfs://")
+                                  ? image.replace(
+                                      "ipfs://",
+                                      "https://gateway.pinata.cloud/ipfs/"
+                                    )
+                                  : image
+                              }
+                              alt={`Property image ${index + 1}`}
+                              className="w-16 h-16 object-cover rounded"
+                            />
+                          )
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  <div className="pt-2 border-t">
+                    <span className="text-sm text-gray-600">IPFS URI</span>
+                    <div className="text-xs font-mono bg-gray-100 p-2 rounded break-all mt-1">
+                      {metadata.metadataURI}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <p className="text-sm text-gray-600 mb-3">
+                    This property has metadata stored on IPFS.
+                  </p>
+                  <div className="text-xs font-mono bg-gray-100 p-2 rounded break-all">
+                    URI: {metadata.metadataURI}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}

@@ -72,7 +72,7 @@ export default function HomePage() {
       title:
         listing.displayName || `Listing #${listing.listingId || listing.id}`,
       location: listing.displayLocation || "Location TBD",
-      price: parseFloat(formatUnits(listing.nightlyRate || "0", 6)),
+      price: parseFloat(formatUnits(listing.nightlyRate || "0", 6)), // 6 decimal places
       rating: 4.85, // Default rating
       image: listing.metadata?.images?.[0] || "/property-palermo-1.png", // Use IPFS image if available
       amenities: [
