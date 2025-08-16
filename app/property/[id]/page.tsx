@@ -28,6 +28,7 @@ import { useListingById } from "@/hooks/use-hhp-data";
 import { useFavorites } from "@/hooks/use-favorites";
 import { formatUnits } from "ethers";
 import { formatAddress } from "@/lib/utils";
+import { BookingModal } from "@/components/booking/booking-modal";
 
 // Type definitions for the listing data
 interface ListingData {
@@ -80,6 +81,7 @@ export default function PropertyDetailPage() {
   const params = useParams();
   const listingId = params.id as string; // This will be "1", "2", "3", etc.
   const [isFavorite, setIsFavorite] = useState(false);
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const { toggleFavorite, isFavorite: checkIsFavorite } = useFavorites();
 
   // Fetch listing data by listing ID
@@ -410,14 +412,25 @@ export default function PropertyDetailPage() {
             <Button variant="outline" className="border-gray-300">
               View on Explorer
             </Button>
-            <Link href={`/booking/${listingId}`}>
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-                Book Now
-              </Button>
-            </Link>
+            <Button
+              onClick={() => setIsBookingModalOpen(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              Book Now
+            </Button>
           </div>
         </div>
       </div>
+
+      {/* Booking Modal */}
+      <BookingModal
+        isOpen={isBookingModalOpen}
+        onClose={() => setIsBookingModalOpen(false)}
+        listingId={listingId}
+        nightlyRate={listing.nightlyRate}
+        maxGuests={listing.maxGuests}
+        requireProof={listing.requireProof}
+      />
     </div>
   );
 }
