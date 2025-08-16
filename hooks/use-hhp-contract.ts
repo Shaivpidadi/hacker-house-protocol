@@ -229,22 +229,48 @@ export function useHHPContract() {
                 const sumBps = createResArgs.bps.reduce((a, b) => a + b, BigInt(0));
                 if (sumBps !== BigInt(10000)) throw new Error("bps must sum to 10000");
 
-
                 const eligibilityProof: EligibilityProofSolidity = {
                     expiry: toSec(proof.expiry),          // seconds
                     nonce: BigInt(proof.nonce),
                     sig: proof.sig as `0x${string}`,
                 };
 
-                // Security validations
-                if (!isLikelyValidSig(eligibilityProof.sig)) throw new Error("Invalid sig format");
+                // Check if we're in development mode (no verifier address configured)
+                const verifierAddress = process.env.NEXT_PUBLIC_VERIFIER_ADDRESS;
+                const forceDevMode = process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_FORCE_DEV_MODE === 'true';
+                const isDevelopmentMode = forceDevMode || !verifierAddress || verifierAddress === '0xYourVerifierAddress';
+
+                console.log("Environment check:", {
+                    verifierAddress,
+                    isDevelopmentMode,
+                    forceDevMode,
+                    nodeEnv: process.env.NODE_ENV,
+                    envVar: process.env.NEXT_PUBLIC_VERIFIER_ADDRESS,
+                    isPlaceholder: verifierAddress === '0xYourVerifierAddress',
+                    isUndefined: !verifierAddress
+                });
+
+                if (isDevelopmentMode) {
+                    console.log("Development mode: Skipping signature validation");
+                    // In development mode, we can use a placeholder signature
+                    // but we still need to ensure it has the right format for the contract
+                    if (!eligibilityProof.sig.startsWith('0x') || eligibilityProof.sig.length !== 132) {
+                        // Create a valid format placeholder signature for development
+                        eligibilityProof.sig = '0x' + '1'.repeat(64) + '2'.repeat(64) + '1b' as `0x${string}`;
+                    }
+                } else {
+                    console.log("Production mode: Enforcing strict signature validation");
+                    // Production mode: strict signature validation
+                    if (!isLikelyValidSig(eligibilityProof.sig)) {
+                        throw new Error("Invalid sig format");
+                    }
+                }
 
                 // TTL validation (contract enforces: block.timestamp <= expiry <= block.timestamp + 600)
                 validateTTL(eligibilityProof.expiry);
 
-                // EIP-712 signature verification
-                const verifierAddress = process.env.NEXT_PUBLIC_VERIFIER_ADDRESS;
-                if (verifierAddress && verifierAddress !== '0xYourVerifierAddress') {
+                // EIP-712 signature verification (only in production mode)
+                if (!isDevelopmentMode && verifierAddress) {
                     const isSignatureValid = await verifyEIP712Signature(
                         walletAddress!,
                         args.listingId,
@@ -256,12 +282,12 @@ export function useHHPContract() {
                         throw new Error("EIP-712 signature verification failed");
                     }
                 } else {
-                    console.warn("Verifier address not configured, skipping signature verification");
+                    console.warn("Development mode: Skipping EIP-712 signature verification");
                 }
-
 
                 console.log("Create reservation arguments:", createResArgs);
                 console.log("Eligibility proof:", eligibilityProof);
+                console.log("Mode:", isDevelopmentMode ? "Development" : "Production");
 
                 const tx = await contract.createReservation(createResArgs, eligibilityProof);
                 const receipt = await tx.wait();

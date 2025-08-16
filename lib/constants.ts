@@ -16,6 +16,8 @@ export const ARBITRUM_SEPOLIA = {
 };
 
 // HHP Protocol configuration
+// To enable development mode (skip signature validation), set NEXT_PUBLIC_VERIFIER_ADDRESS to '0xYourVerifierAddress'
+// To enable production mode (strict signature validation), set NEXT_PUBLIC_VERIFIER_ADDRESS to your actual verifier address
 export const HHP_CONFIG = {
     contractAddress: CONTRACT_ADDRESS,
     chainId: CHAIN_ID,

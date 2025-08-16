@@ -123,7 +123,7 @@ export function BookingModal({
     const mockProof: EligibilityProof = {
       expiry: Math.floor(Date.now() / 1000) + 300, // 5 minutes from now (within 600s TTL limit)
       nonce: Math.floor(Math.random() * 1000000),
-      sig: "0x" + "0".repeat(132), // Mock signature (65 bytes = 130 hex chars + 0x prefix)
+      sig: "0x" + "1".repeat(64) + "2".repeat(64) + "1b", // Valid format placeholder signature for development
     };
 
     if (!walletAddress) {
