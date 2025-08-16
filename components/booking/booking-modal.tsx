@@ -11,6 +11,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { X, Plus, User, Calendar as CalendarIcon } from "lucide-react";
 import {
@@ -44,7 +50,7 @@ export function BookingModal({
   maxGuests,
   requireProof,
 }: BookingModalProps) {
-  const { isConnected, connectWallet } = useWallet();
+  const { isConnected, connectWallet, walletAddress } = useWallet();
   const { createReservation, fundReservation, isLoading, error } =
     useHHPContract();
 
@@ -116,13 +122,20 @@ export function BookingModal({
       sig: "0x" + "0".repeat(130), // Mock signature
     };
 
+    if (!walletAddress) {
+      throw new Error("Wallet address not available");
+    }
+
     const args: CreateReservationArgs = {
       listingId: parseInt(listingId),
       startDate: startDate.getTime(),
       endDate: endDate.getTime(),
       nights,
-      payers: [guests.map((g) => g.address)], // For now, just the booker
-      bps: [10000], // 100% for the booker
+      payers: [walletAddress, ...guests.map((g) => g.address)], // Bookers + guests
+      bps: [
+        10000 - guests.length * Math.floor(10000 / (guests.length + 1)),
+        ...guests.map(() => Math.floor(10000 / (guests.length + 1))),
+      ], // Split evenly
     };
 
     try {
@@ -182,39 +195,126 @@ export function BookingModal({
           <div className="space-y-4">
             <div>
               <Label>Select Dates</Label>
-              <div className="grid grid-cols-2 gap-2 mt-2">
-                <div>
-                  <Label className="text-sm">Check-in</Label>
-                  <Calendar
-                    mode="single"
-                    selected={startDate}
-                    onSelect={setStartDate}
-                    disabled={(date) => date < new Date()}
-                    className="rounded-md border"
-                  />
+              <div className="grid grid-cols-2 gap-3 mt-3">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Check-in</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !startDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {startDate ? (
+                          startDate.toLocaleDateString()
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={startDate}
+                        onSelect={setStartDate}
+                        disabled={(date) => date < new Date()}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
-                <div>
-                  <Label className="text-sm">Check-out</Label>
-                  <Calendar
-                    mode="single"
-                    selected={endDate}
-                    onSelect={setEndDate}
-                    disabled={(date) => !startDate || date <= startDate}
-                    className="rounded-md border"
-                  />
+
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Check-out</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !endDate && "text-muted-foreground"
+                        )}
+                        disabled={!startDate}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {endDate ? (
+                          endDate.toLocaleDateString()
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={endDate}
+                        onSelect={setEndDate}
+                        disabled={(date) => !startDate || date <= startDate}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+
+              {/* Quick Date Selection */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Quick Select</Label>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { label: "1 night", days: 1 },
+                    { label: "2 nights", days: 2 },
+                    { label: "3 nights", days: 3 },
+                    { label: "1 week", days: 7 },
+                  ].map((option) => (
+                    <Button
+                      key={option.days}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        if (startDate) {
+                          const newEndDate = new Date(startDate);
+                          newEndDate.setDate(startDate.getDate() + option.days);
+                          setEndDate(newEndDate);
+                        }
+                      }}
+                      disabled={!startDate}
+                      className="text-xs"
+                    >
+                      {option.label}
+                    </Button>
+                  ))}
                 </div>
               </div>
             </div>
 
             {startDate && endDate && (
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <p className="text-sm">
-                  <strong>{nights}</strong> night{nights > 1 ? "s" : ""} •
-                  <strong> ${totalCost.toFixed(2)}</strong> total
-                </p>
-                <p className="text-xs text-gray-600">
-                  ${parseFloat(nightlyRate).toFixed(2)} per night
-                </p>
+              <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-blue-900">
+                    Booking Summary
+                  </span>
+                  <Badge variant="secondary" className="text-xs">
+                    {nights} night{nights > 1 ? "s" : ""}
+                  </Badge>
+                </div>
+                <div className="space-y-1">
+                  <div className="flex justify-between text-sm">
+                    <span>Rate per night:</span>
+                    <span className="font-medium">
+                      ${parseFloat(nightlyRate).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Total cost:</span>
+                    <span className="font-bold text-lg text-blue-900">
+                      ${totalCost.toFixed(2)}
+                    </span>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -231,9 +331,17 @@ export function BookingModal({
         {currentStep === 2 && (
           <div className="space-y-4">
             <div>
-              <Label>Add Guests (Optional)</Label>
-              <p className="text-sm text-gray-600 mb-3">
-                Maximum {maxGuests} guests allowed
+              <div className="flex items-center justify-between mb-3">
+                <Label className="text-base font-medium">
+                  Add Guests (Optional)
+                </Label>
+                <Badge variant="outline" className="text-xs">
+                  {guests.length + 1}/{maxGuests} guests
+                </Badge>
+              </div>
+              <p className="text-sm text-gray-600 mb-4">
+                Invite other users to join your reservation. They can contribute
+                to the payment.
               </p>
 
               <div className="space-y-2">
@@ -261,45 +369,82 @@ export function BookingModal({
               </div>
 
               {guests.length < maxGuests - 1 && (
-                <div className="space-y-2 mt-3">
-                  <Input
-                    placeholder="Guest wallet address"
-                    value={newGuestAddress}
-                    onChange={(e) => setNewGuestAddress(e.target.value)}
-                  />
-                  <Input
-                    placeholder="Guest name"
-                    value={newGuestName}
-                    onChange={(e) => setNewGuestName(e.target.value)}
-                  />
-                  <Button
-                    onClick={handleAddGuest}
-                    disabled={!newGuestAddress || !newGuestName}
-                    variant="outline"
-                    size="sm"
-                    className="w-full"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Guest
-                  </Button>
+                <div className="space-y-3 mt-4 p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                  <div className="text-center mb-3">
+                    <User className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                    <p className="text-sm font-medium text-gray-700">
+                      Add New Guest
+                    </p>
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <Label className="text-sm font-medium">
+                        Wallet Address
+                      </Label>
+                      <Input
+                        placeholder="0x1234...5678"
+                        value={newGuestAddress}
+                        onChange={(e) => setNewGuestAddress(e.target.value)}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium">
+                        Display Name
+                      </Label>
+                      <Input
+                        placeholder="Guest's name"
+                        value={newGuestName}
+                        onChange={(e) => setNewGuestName(e.target.value)}
+                        className="mt-1"
+                      />
+                    </div>
+                    <Button
+                      onClick={handleAddGuest}
+                      disabled={!newGuestAddress || !newGuestName}
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Guest
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>
 
-            <div className="bg-gray-50 p-3 rounded-lg">
-              <p className="text-sm font-medium">Payment Summary</p>
-              <div className="text-xs space-y-1 mt-2">
-                <div className="flex justify-between">
+            <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-sm font-medium text-green-900">
+                  Payment Summary
+                </p>
+                <Badge
+                  variant="secondary"
+                  className="text-xs bg-green-100 text-green-800"
+                >
+                  {guests.length + 1}{" "}
+                  {guests.length === 0 ? "person" : "people"}
+                </Badge>
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
                   <span>Total cost:</span>
-                  <span>${totalCost.toFixed(2)}</span>
+                  <span className="font-medium">${totalCost.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between text-sm">
                   <span>Per person:</span>
-                  <span>${costPerPerson.toFixed(2)}</span>
+                  <span className="font-medium text-green-700">
+                    ${costPerPerson.toFixed(2)}
+                  </span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Guests:</span>
-                  <span>{guests.length + 1}</span>
+                <div className="pt-2 border-t border-green-200">
+                  <div className="flex justify-between text-sm font-medium">
+                    <span>Your share:</span>
+                    <span className="text-green-900">
+                      ${costPerPerson.toFixed(2)}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

@@ -26,13 +26,6 @@ export function Explore() {
   // Fetch real HHP listings from subgraph with enhanced data
   const { data, isLoading, error, refetch } = useEnhancedListings({
     first: 50,
-    where: {
-      active: true,
-      ...(searchTerm && {
-        name_contains_nocase: searchTerm,
-        location_contains_nocase: searchTerm,
-      }),
-    },
   });
 
   const listings = data?.listingCreatedBasics || [];
@@ -40,38 +33,52 @@ export function Explore() {
   const privateDataSets = data?.listingPrivateDataSets || [];
 
   // Transform HHP listings to property format for existing PropertyCard component
-  const properties = listings.map((listing: any) => {
-    // Find associated metadata and private data
-    const metadata = metadataSets.find(
-      (m: any) => m.listingId === listing.listingId
-    );
-    const privateData = privateDataSets.find(
-      (p: any) => p.listingId === listing.listingId
-    );
+  const properties = listings
+    .filter((listing: any) => {
+      if (!searchTerm) return true;
 
-    return {
-      id: listing.id,
-      title: listing.name || `Listing #${listing.listingId}`,
-      location: listing.location || "Location TBD",
-      price: parseFloat(formatUnits(listing.nightlyRate, 6)),
-      rating: 4.85, // Default rating since HHP doesn't have ratings yet
-      image: "/property-palermo-1.png", // Default image
-      amenities: [
-        listing.requireProof ? "Proof Required" : "No Proof Required",
-        `Max ${listing.maxGuests} guests`,
-        "Blockchain verified",
-        `Builder: ${formatAddress(listing.builder)}`,
-        metadata?.metadataURI ? "Has Metadata" : "No Metadata",
-        privateData?.encPrivDataCid
-          ? "Private Data Available"
-          : "No Private Data",
-      ],
-      isFavorite: false,
-      hhpData: listing, // Store original HHP data
-      metadata: metadata, // Store metadata for expanded view
-      privateData: privateData, // Store private data for expanded view
-    };
-  });
+      // Client-side filtering since GraphQL doesn't support text search
+      const listingName = `Listing #${listing.listingId}`;
+      const listingLocation = "Location TBD"; // Will be updated when we get IPFS metadata
+
+      return (
+        listingName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        listingLocation.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        listing.builder.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    })
+    .map((listing: any) => {
+      // Find associated metadata and private data
+      const metadata = metadataSets.find(
+        (m: any) => m.listingId === listing.listingId
+      );
+      const privateData = privateDataSets.find(
+        (p: any) => p.listingId === listing.listingId
+      );
+
+      return {
+        id: listing.id,
+        title: listing.name || `Listing #${listing.listingId}`,
+        location: listing.location || "Location TBD",
+        price: parseFloat(formatUnits(listing.nightlyRate, 6)),
+        rating: 4.85, // Default rating since HHP doesn't have ratings yet
+        image: "/property-palermo-1.png", // Default image
+        amenities: [
+          listing.requireProof ? "Proof Required" : "No Proof Required",
+          `Max ${listing.maxGuests} guests`,
+          "Blockchain verified",
+          `Builder: ${formatAddress(listing.builder)}`,
+          metadata?.metadataURI ? "Has Metadata" : "No Metadata",
+          privateData?.encPrivDataCid
+            ? "Private Data Available"
+            : "No Private Data",
+        ],
+        isFavorite: false,
+        hhpData: listing, // Store original HHP data
+        metadata: metadata, // Store metadata for expanded view
+        privateData: privateData, // Store private data for expanded view
+      };
+    });
 
   const events = [
     {
