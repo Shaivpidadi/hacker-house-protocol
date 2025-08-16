@@ -41,14 +41,18 @@ export function Explore() {
   const privateDataSets = data?.listingPrivateDataSets || [];
 
   // Transform HHP listings to property format for existing PropertyCard component
-  const properties = listings.map((listing) => {
+  const properties = listings.map((listing: any) => {
     // Find associated metadata and private data
-    const metadata = metadataSets.find((m) => m.listingId === listing.id);
-    const privateData = privateDataSets.find((p) => p.listingId === listing.id);
+    const metadata = metadataSets.find(
+      (m: any) => m.listingId === listing.listingId
+    );
+    const privateData = privateDataSets.find(
+      (p: any) => p.listingId === listing.listingId
+    );
 
     return {
       id: listing.id,
-      title: listing.name || `Listing #${listing.id}`,
+      title: listing.name || `Listing #${listing.listingId}`, // Changed from listing.id to listing.listingId
       location: listing.location || "Location TBD",
       price: parseFloat(formatEther(listing.nightlyRate)),
       rating: 4.85, // Default rating since HHP doesn't have ratings yet
@@ -200,7 +204,7 @@ export function Explore() {
 
             {!isLoading && !error && properties.length > 0 && (
               <>
-                {properties.map((property) => (
+                {properties.map((property: any) => (
                   <PropertyCard key={property.id} property={property} />
                 ))}
 

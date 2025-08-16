@@ -54,10 +54,19 @@ export function useEnhancedListingsWithIPFS(params?: {
             if (!subgraphData?.listingCreatedBasics) return new Map();
 
             const metadataUris = subgraphData.listingMetadataURISets
-                .map(set => set.metadataURI)
+                .map((set: any) => set.metadataURI)
                 .filter(Boolean);
 
-            return await batchFetchIPFSMetadata(metadataUris);
+            console.log('Fetching IPFS metadata for URIs:', metadataUris);
+
+            try {
+                const result = await batchFetchIPFSMetadata(metadataUris);
+                console.log('IPFS metadata result:', result);
+                return result;
+            } catch (error) {
+                console.error('Error fetching IPFS metadata:', error);
+                return new Map();
+            }
         },
         enabled: !!subgraphData?.listingCreatedBasics,
         staleTime: 10 * 60 * 1000, // 10 minutes
@@ -70,13 +79,13 @@ export function useEnhancedListingsWithIPFS(params?: {
     const enhancedListings = useMemo(() => {
         if (!subgraphData?.listingCreatedBasics) return [];
 
-        return subgraphData.listingCreatedBasics.map((listing) => {
+        return subgraphData.listingCreatedBasics.map((listing: any) => {
             // Find associated metadata and private data
             const metadataSet = subgraphData.listingMetadataURISets.find(
-                m => m.listingId === listing.id
+                (m: any) => m.listingId === listing.listingId
             );
             const privateDataSet = subgraphData.listingPrivateDataSets.find(
-                p => p.listingId === listing.id
+                (p: any) => p.listingId === listing.listingId
             );
 
             // Get IPFS metadata
@@ -89,7 +98,7 @@ export function useEnhancedListingsWithIPFS(params?: {
                 privateDataCid: privateDataSet?.encPrivDataCid,
 
                 // Computed fields
-                displayName: metadata?.name || `Listing #${listing.id}`,
+                displayName: metadata?.name || `Listing #${listing.listingId}`,
                 displayLocation: metadata?.location || 'Location TBD',
                 hasMetadata: !!metadata,
                 hasPrivateData: !!privateDataSet?.encPrivDataCid,
