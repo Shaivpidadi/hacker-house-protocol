@@ -16,9 +16,8 @@ import { Input } from "@/components/ui/input";
 import { BottomNavigation } from "@/components/bottom-navigation";
 import { PropertyCard } from "@/components/explore/property-card";
 import { useEnhancedListings } from "@/hooks/use-hhp-data";
-import { formatEther } from "ethers";
-import Link from "next/link";
 import { formatAddress } from "@/lib/utils";
+import { formatUnits } from "ethers"; // Added formatUnits import
 
 export function Explore() {
   const [activeTab, setActiveTab] = useState("Apartments");
@@ -54,7 +53,7 @@ export function Explore() {
       id: listing.id,
       title: listing.name || `Listing #${listing.listingId}`, // Changed from listing.id to listing.listingId
       location: listing.location || "Location TBD",
-      price: parseFloat(formatEther(listing.nightlyRate)),
+      price: parseFloat(formatUnits(listing.nightlyRate, 6)), // Changed from formatEther to formatUnits
       rating: 4.85, // Default rating since HHP doesn't have ratings yet
       image: "/property-palermo-1.png", // Default image
       amenities: [

@@ -25,7 +25,7 @@ import { usePrivy } from "@privy-io/react-auth";
 import { BottomNavigation } from "@/components/bottom-navigation";
 import { useDashboardSummary } from "@/hooks/use-hhp-data";
 import { useEnhancedListingsWithIPFS } from "@/hooks/use-enhanced-listings";
-import { formatEther } from "ethers";
+import { formatEther, formatUnits } from "ethers";
 import { TrendingUp, RefreshCw } from "lucide-react";
 
 export default function HomePage() {
@@ -71,7 +71,7 @@ export default function HomePage() {
       id: listing.id,
       title: listing.displayName,
       location: listing.displayLocation,
-      price: parseFloat(formatEther(listing.nightlyRate)),
+      price: parseFloat(formatUnits(listing.nightlyRate, 6)), // Changed from formatEther to formatUnits with 6 decimals for pyUSD
       rating: 4.85, // Default rating
       image: listing.metadata?.images?.[0] || "/property-palermo-1.png", // Use IPFS image if available
       amenities: [
@@ -196,16 +196,19 @@ export default function HomePage() {
               <Card className="text-center p-3 bg-white/80 backdrop-blur-sm">
                 <div className="text-2xl font-bold text-purple-600">
                   {dashboardData.reservationFundeds.length > 0
-                    ? formatEther(
+                    ? formatUnits(
                         dashboardData.reservationFundeds.reduce(
                           (sum: bigint, fund: any) =>
                             sum + BigInt(fund.amount || "0"),
                           BigInt(0)
-                        )
+                        ),
+                        6 // pyUSD has 6 decimals
                       ).slice(0, 6)
                     : "0"}
                 </div>
-                <div className="text-xs text-gray-600">Total Funded</div>
+                <div className="text-xs text-gray-600">
+                  Total Funded (pyUSD)
+                </div>
               </Card>
             </div>
           </div>
