@@ -1,6 +1,7 @@
 'use client';
 
-import { useProperties, useCreatePropertyWithImage } from '@/lib/hooks';
+import { useProperties } from '@/lib/hooks';
+import { useCreatePropertyWithImage } from '@/lib/operations';
 import { useState } from 'react';
 
 export function PropertyList() {
@@ -13,10 +14,26 @@ export function PropertyList() {
     wifi: undefined
   });
 
-  const { data: properties, loading, error } = useProperties(filters);
+  const { data: properties, isPending, isError } = useProperties(filters);
   const createPropertyWithImage = useCreatePropertyWithImage();
 
-  const handleCreateProperty = async (propertyData: any) => {
+  const handleCreateProperty = async (propertyData: {
+    name: string;
+    description: string;
+    location: string;
+    price: number;
+    size: number;
+    bedrooms: number;
+    bathrooms: number;
+    parking: number;
+    amenities: string;
+    wifi: boolean;
+    features: string;
+    status: string;
+    type: string;
+    deposit: number;
+    imageUrl?: string;
+  }) => {
     try {
       await createPropertyWithImage(propertyData, propertyData.imageUrl);
       // Property will automatically appear in the list due to real-time sync
@@ -25,8 +42,8 @@ export function PropertyList() {
     }
   };
 
-  if (loading) return <div>Loading properties...</div>;
-  if (error) return <div>Error loading properties: {error.message}</div>;
+  if (isPending) return <div>Loading properties...</div>;
+  if (isError) return <div>Error loading properties</div>;
 
   return (
     <div>
@@ -34,9 +51,9 @@ export function PropertyList() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {properties?.map((property) => (
           <div key={property.id} className="border rounded-lg p-4">
-            {property.image && (
+            {property.image && property.image[0] && (
               <img 
-                src={property.image.url} 
+                src={property.image[0].url} 
                 alt={property.name}
                 className="w-full h-48 object-cover rounded"
               />
