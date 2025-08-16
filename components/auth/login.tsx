@@ -1,40 +1,44 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Eye, EyeOff, Loader2, Github, Chrome, Apple } from "lucide-react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useAuth } from "@/lib/auth"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Eye, EyeOff, Loader2, Github, Chrome, Apple } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { usePrivy } from "@privy-io/react-auth";
 
 export function Login() {
-  const [showPassword, setShowPassword] = useState(false)
-  const [email, setEmail] = useState("demo@cryptoreal.com")
-  const [password, setPassword] = useState("password123")
-  const [isLoading, setIsLoading] = useState(false)
-  const { login } = useAuth()
-  const router = useRouter()
+  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("demo@cryptoreal.com");
+  const [password, setPassword] = useState("password123");
+  const [isLoading, setIsLoading] = useState(false);
+  const { login, ready, authenticated, user } = usePrivy();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
 
     try {
-      const success = await login(email, password)
-      if (success) {
-        router.push("/")
-      }
+      // For now, we'll use a mock login since we're only using Privy for wallet auth
+      // In the future, you can integrate this with your backend auth system
+      console.log("Traditional login attempted with:", { email, password });
+
+      // Simulate successful login
+      setTimeout(() => {
+        router.push("/");
+      }, 1000);
     } catch (error) {
-      console.error("Login failed:", error)
+      console.error("Login failed:", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col max-w-md mx-auto">
@@ -43,20 +47,101 @@ export function Login() {
         {/* Avatar */}
         <div className="flex justify-center mb-8">
           <div className="w-20 h-20 gradient-primary rounded-full flex items-center justify-center glass shadow-lg">
-            <span className="text-primary-foreground text-2xl font-bold">CR</span>
+            <span className="text-primary-foreground text-2xl font-bold">
+              CR
+            </span>
           </div>
         </div>
 
         {/* Title */}
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold mb-2 text-foreground">Login</h1>
-          <p className="text-muted-foreground">Please enter your details below</p>
+          <p className="text-muted-foreground">
+            Please enter your details below
+          </p>
         </div>
+
+        {/* Wallet Connect Section */}
+        {ready && !authenticated && (
+          <div className="mb-8 p-6 bg-muted/30 rounded-lg border border-border">
+            <div className="text-center mb-4">
+              <h2 className="text-lg font-semibold text-foreground mb-2">
+                Quick Wallet Login
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Connect your wallet for instant access
+              </p>
+            </div>
+            <Button
+              onClick={login}
+              className="w-full h-12 gradient-primary hover:opacity-90 text-primary-foreground rounded-lg text-base font-medium transition-all duration-300 transform hover:scale-[1.02] glass shadow-lg"
+            >
+              <svg
+                className="w-5 h-5 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                />
+              </svg>
+              Connect Wallet
+            </Button>
+          </div>
+        )}
+
+        {/* Show user info if already connected */}
+        {authenticated && user && (
+          <div className="mb-8 p-6 bg-green-500/10 rounded-lg border border-green-500/20">
+            <div className="text-center">
+              <h2 className="text-lg font-semibold text-green-600 mb-2">
+                Wallet Connected!
+              </h2>
+              <p className="text-sm text-green-600/80 mb-3">
+                {user.wallet?.address
+                  ? `${user.wallet.address.slice(
+                      0,
+                      6
+                    )}...${user.wallet.address.slice(-4)}`
+                  : "Wallet connected successfully"}
+              </p>
+              <Button
+                onClick={() => router.push("/wallet")}
+                variant="outline"
+                size="sm"
+                className="border-green-500/30 text-green-600 hover:bg-green-500/10"
+              >
+                Go to Wallet Dashboard
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Divider */}
+        {ready && (
+          <div className="relative mb-8">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-border" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                Or use traditional login
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <Label htmlFor="email" className="text-sm font-medium text-foreground mb-2 block">
+            <Label
+              htmlFor="email"
+              className="text-sm font-medium text-foreground mb-2 block"
+            >
               Email
             </Label>
             <Input
@@ -70,7 +155,10 @@ export function Login() {
           </div>
 
           <div>
-            <Label htmlFor="password" className="text-sm font-medium text-foreground mb-2 block">
+            <Label
+              htmlFor="password"
+              className="text-sm font-medium text-foreground mb-2 block"
+            >
               Password
             </Label>
             <div className="relative">
@@ -101,11 +189,17 @@ export function Login() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Checkbox id="remember" />
-              <Label htmlFor="remember" className="text-sm text-muted-foreground">
+              <Label
+                htmlFor="remember"
+                className="text-sm text-muted-foreground"
+              >
                 Remember me
               </Label>
             </div>
-            <Link href="#" className="text-sm text-accent hover:underline transition-colors">
+            <Link
+              href="#"
+              className="text-sm text-accent hover:underline transition-colors"
+            >
               Forgot Password?
             </Link>
           </div>
@@ -155,7 +249,10 @@ export function Login() {
           <div className="text-center">
             <p className="text-muted-foreground">
               Don't have an account?{" "}
-              <Link href="/signup" className="text-accent hover:underline font-medium">
+              <Link
+                href="/signup"
+                className="text-accent hover:underline font-medium"
+              >
                 Sign up
               </Link>
             </p>
@@ -163,5 +260,5 @@ export function Login() {
         </form>
       </div>
     </div>
-  )
+  );
 }

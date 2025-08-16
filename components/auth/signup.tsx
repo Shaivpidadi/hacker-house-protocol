@@ -1,50 +1,54 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Eye, EyeOff, Loader2, Github, Chrome, Apple } from "lucide-react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useAuth } from "@/lib/auth"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Eye, EyeOff, Loader2, Github, Chrome, Apple } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { usePrivy } from "@privy-io/react-auth";
 
 export function SignUp() {
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [name, setName] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
-  const { signup } = useAuth()
-  const router = useRouter()
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [name, setName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const { ready, authenticated, user } = usePrivy();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
+    e.preventDefault();
+    setError("");
 
     if (password !== confirmPassword) {
-      setError("Passwords don't match")
-      return
+      setError("Passwords don't match");
+      return;
     }
 
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
-      const success = await signup(email, password, name)
-      if (success) {
-        router.push("/onboarding/role")
-      }
+      // For now, we'll use a mock signup since we're only using Privy for wallet auth
+      // In the future, you can integrate this with your backend auth system
+      console.log("Signup attempted with:", { email, password, name });
+
+      // Simulate successful signup
+      setTimeout(() => {
+        router.push("/onboarding/role");
+      }, 1000);
     } catch (error) {
-      setError("Sign up failed. Please try again.")
+      setError("Sign up failed. Please try again.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col max-w-md mx-auto">
@@ -53,14 +57,18 @@ export function SignUp() {
         {/* Avatar */}
         <div className="flex justify-center mb-8">
           <div className="w-20 h-20 gradient-primary rounded-full flex items-center justify-center glass shadow-lg">
-            <span className="text-primary-foreground text-2xl font-bold">CR</span>
+            <span className="text-primary-foreground text-2xl font-bold">
+              CR
+            </span>
           </div>
         </div>
 
         {/* Title */}
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold mb-2 text-foreground">Sign Up</h1>
-          <p className="text-muted-foreground">Please enter your details below</p>
+          <p className="text-muted-foreground">
+            Please enter your details below
+          </p>
         </div>
 
         {/* Form */}
@@ -72,7 +80,10 @@ export function SignUp() {
           )}
 
           <div>
-            <Label htmlFor="name" className="text-sm font-medium text-foreground mb-2 block">
+            <Label
+              htmlFor="name"
+              className="text-sm font-medium text-foreground mb-2 block"
+            >
               Full Name
             </Label>
             <Input
@@ -86,7 +97,10 @@ export function SignUp() {
           </div>
 
           <div>
-            <Label htmlFor="email" className="text-sm font-medium text-foreground mb-2 block">
+            <Label
+              htmlFor="email"
+              className="text-sm font-medium text-foreground mb-2 block"
+            >
               Email
             </Label>
             <Input
@@ -100,7 +114,10 @@ export function SignUp() {
           </div>
 
           <div>
-            <Label htmlFor="password" className="text-sm font-medium text-foreground mb-2 block">
+            <Label
+              htmlFor="password"
+              className="text-sm font-medium text-foreground mb-2 block"
+            >
               Password
             </Label>
             <div className="relative">
@@ -129,7 +146,10 @@ export function SignUp() {
           </div>
 
           <div>
-            <Label htmlFor="confirmPassword" className="text-sm font-medium text-foreground mb-2 block">
+            <Label
+              htmlFor="confirmPassword"
+              className="text-sm font-medium text-foreground mb-2 block"
+            >
               Confirm Password
             </Label>
             <div className="relative">
@@ -202,7 +222,10 @@ export function SignUp() {
           <div className="text-center">
             <p className="text-muted-foreground">
               Already have an account?{" "}
-              <Link href="/login" className="text-accent hover:underline font-medium">
+              <Link
+                href="/login"
+                className="text-accent hover:underline font-medium"
+              >
                 Log in
               </Link>
             </p>
@@ -210,5 +233,5 @@ export function SignUp() {
         </form>
       </div>
     </div>
-  )
+  );
 }

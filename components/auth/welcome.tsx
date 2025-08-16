@@ -1,20 +1,20 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
-import { useAuth } from "@/lib/auth"
-import { useRouter } from "next/navigation"
-import { useEffect } from "react"
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { usePrivy } from "@privy-io/react-auth";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export function Welcome() {
-  const { user } = useAuth()
-  const router = useRouter()
+  const { user, authenticated, ready } = usePrivy();
+  const router = useRouter();
 
   useEffect(() => {
-    if (user) {
-      router.push("/")
+    if (ready && authenticated && user) {
+      router.push("/");
     }
-  }, [user, router])
+  }, [ready, authenticated, user, router]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col max-w-md mx-auto">
@@ -27,9 +27,15 @@ export function Welcome() {
 
         {/* Welcome Text */}
         <div className="text-center mb-16">
-          <h1 className="text-3xl font-bold mb-2 gradient-primary bg-clip-text text-transparent">Welcome to</h1>
-          <h1 className="text-3xl font-bold gradient-primary bg-clip-text text-transparent">CryptoReal</h1>
-          <p className="text-muted-foreground mt-4">Your crypto rental & co-pay platform</p>
+          <h1 className="text-3xl font-bold mb-2 gradient-primary bg-clip-text text-transparent">
+            Welcome to
+          </h1>
+          <h1 className="text-3xl font-bold gradient-primary bg-clip-text text-transparent">
+            CryptoReal
+          </h1>
+          <p className="text-muted-foreground mt-4">
+            Your crypto rental & co-pay platform
+          </p>
         </div>
 
         {/* Buttons */}
@@ -51,12 +57,15 @@ export function Welcome() {
 
         <div className="mt-8">
           <Link href="/">
-            <Button variant="ghost" className="text-muted-foreground hover:text-foreground transition-colors">
+            <Button
+              variant="ghost"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
               Skip for now
             </Button>
           </Link>
         </div>
       </div>
     </div>
-  )
+  );
 }
