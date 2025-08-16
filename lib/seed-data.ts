@@ -133,8 +133,38 @@ export function useSeedDatabase() {
   return async () => {
     try {
       console.log('🌱 Starting database seeding...');
+      console.log('🔍 Hypergraph entities available:', {
+        createImage: typeof createImage,
+        createHacker: typeof createHacker,
+        createLandlord: typeof createLandlord,
+        createProperty: typeof createProperty,
+        createBooking: typeof createBooking,
+        createReview: typeof createReview,
+        createEvent: typeof createEvent
+      });
+      
       const { hackers, landlords, properties, bookings, reviews, events } = generateMockData();
 
+      // Test creation with detailed logging
+      console.log('📝 Creating test image...');
+      const testImage = createImage({ url: 'https://picsum.photos/200/200?random=999' });
+      console.log('🖼️ Test image created:', testImage);
+      console.log('🆔 Image ID:', testImage.id);
+      console.log('🔗 Image URL:', testImage.url);
+      console.log('📊 Full image object:', JSON.stringify(testImage, null, 2));
+      
+      console.log('📝 Creating test hacker...');
+      const testHacker = createHacker({
+        name: "TestHacker",
+        walletAddress: "0x1234567890abcdef",
+        githubUrl: "https://github.com/testhacker",
+        twitterUrl: "https://twitter.com/testhacker",
+        avatar: [testImage.id]
+      });
+      console.log('👨‍💻 Test hacker created:', testHacker);
+      console.log(' Hacker ID:', testHacker.id);
+      console.log(' Full hacker object:', JSON.stringify(testHacker, null, 2));
+      
       // Create images first
       const imageIds: string[] = [];
       for (const hacker of hackers) {
@@ -256,7 +286,9 @@ export function useSeedDatabase() {
       
       return { success: true };
     } catch (error) {
-      console.error('❌ Database seeding failed:', error);
+      console.error('❌ Seeding failed:', error);
+      console.error('🔍 Error details:', error);
+      console.error('📋 Error stack:', error instanceof Error ? error.stack : 'No stack trace');
       return { success: false, error };
     }
   };

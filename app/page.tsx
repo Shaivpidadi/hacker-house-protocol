@@ -4,8 +4,6 @@ import Link from 'next/link';
 import { LoginButton } from '@/Components/Login/LoginButton';
 import { Button } from '@/Components/ui/button';
 import { PropertyList } from '@/Components/PropertyList';
-import { SeedDatabase } from '@/Components/SeedDatabase';
-import { Dashboard } from '@/Components/Dashboard';
 
 export default function Home() {
   return (
@@ -18,8 +16,7 @@ export default function Home() {
             <PropertyList />
           </div>
           <div className="space-y-6">
-            <SeedDatabase />
-            <Dashboard />
+            {/* Dashboard will be recreated by v0 */}
           </div>
         </div>
       </div>
