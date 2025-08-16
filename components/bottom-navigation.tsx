@@ -23,13 +23,20 @@ export function BottomNavigation({
 }: BottomNavigationProps) {
   const { user, logout, authenticated, ready } = usePrivy();
   const router = useRouter();
+  const pathname = router.pathname || window.location.pathname;
+
+  // Hide navigation on login page
+  if (pathname === "/login") {
+    return null;
+  }
+
+  // Hide navigation if not authenticated
+  if (!authenticated || !ready) {
+    return null;
+  }
 
   const handleProfileClick = () => {
-    if (authenticated && ready) {
-      router.push("/profile");
-    } else {
-      router.push("/welcome");
-    }
+    router.push("/profile");
   };
 
   const handleLogout = () => {
@@ -58,16 +65,10 @@ export function BottomNavigation({
       href: "/hackstay",
     },
     {
-      icon: Wallet,
-      label: "Wallet",
-      active: activeTab === "Wallet",
-      href: "/wallet",
-    },
-    {
       icon: User,
-      label: authenticated && ready ? "Profile" : "Login",
+      label: "Profile",
       active: activeTab === "Profile",
-      href: authenticated && ready ? "/profile" : "/welcome",
+      href: "/profile",
       onClick: handleProfileClick,
     },
   ];
@@ -124,16 +125,14 @@ export function BottomNavigation({
               )}
             </div>
           ))}
-          {authenticated && ready && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="absolute -top-12 right-4 bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-full p-2 shadow-lg transition-all duration-300 hover:scale-110 glass"
-              onClick={handleLogout}
-            >
-              <LogOut className="w-4 h-4" />
-            </Button>
-          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            className="absolute -top-12 right-4 bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-full p-2 shadow-lg transition-all duration-300 hover:scale-110 glass"
+            onClick={handleLogout}
+          >
+            <LogOut className="w-4 h-4" />
+          </Button>
         </div>
         <div className="h-1 bg-foreground/20 mx-auto w-32 rounded-full mb-2"></div>
       </div>

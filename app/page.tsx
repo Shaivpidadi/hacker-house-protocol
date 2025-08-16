@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import { usePrivy } from "@privy-io/react-auth";
+import { BottomNavigation } from "@/components/bottom-navigation";
 
 export default function HomePage() {
   const { user, authenticated, ready } = usePrivy();
@@ -277,56 +278,7 @@ export default function HomePage() {
       </div>
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200 shadow-lg">
-        <div className="max-w-md mx-auto px-4 py-2">
-          <div className="flex justify-around">
-            <Button
-              variant="ghost"
-              className="flex flex-col items-center py-2 text-blue-600 transition-all duration-200 hover:scale-110"
-            >
-              <Home className="w-6 h-6 mb-1" />
-              <span className="text-xs font-medium">Home</span>
-            </Button>
-            <Link href="/explore">
-              <Button
-                variant="ghost"
-                className="flex flex-col items-center py-2 text-gray-500 hover:text-gray-700 transition-all duration-200 hover:scale-110"
-              >
-                <Compass className="w-6 h-6 mb-1" />
-                <span className="text-xs">Explore</span>
-              </Button>
-            </Link>
-            <Button
-              variant="ghost"
-              className="flex flex-col items-center py-2 text-gray-500 hover:text-gray-700 transition-all duration-200 hover:scale-110"
-            >
-              <Heart className="w-6 h-6 mb-1" />
-              <span className="text-xs">Favorites</span>
-            </Button>
-            <Button
-              variant="ghost"
-              className="flex flex-col items-center py-2 text-gray-500 hover:text-gray-700 transition-all duration-200 hover:scale-110"
-            >
-              <Calendar className="w-6 h-6 mb-1" />
-              <span className="text-xs">Hackstay</span>
-            </Button>
-            <Button
-              variant="ghost"
-              className="flex flex-col items-center py-2 text-gray-500 hover:text-gray-700 transition-all duration-200 hover:scale-110"
-              onClick={() =>
-                authenticated
-                  ? (window.location.href = "/profile")
-                  : (window.location.href = "/login")
-              }
-            >
-              <User className="w-6 h-6 mb-1" />
-              <span className="text-xs">
-                {authenticated ? "Profile" : "Login"}
-              </span>
-            </Button>
-          </div>
-        </div>
-      </div>
+      <BottomNavigation activeTab="Home" />
     </div>
   );
 }
