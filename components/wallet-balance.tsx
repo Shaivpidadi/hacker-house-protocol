@@ -1,7 +1,7 @@
 "use client";
 
 import { usePrivy, getAccessToken } from "@privy-io/react-auth";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Coins, Wallet, RefreshCw } from "lucide-react";
@@ -22,53 +22,53 @@ export default function WalletBalance() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const fetchBalances = useCallback(async () => {
     if (!authenticated || !user?.wallet?.address) {
       setBalances([]);
       return;
     }
 
-    const fetchBalances = async () => {
-      setLoading(true);
-      setError(null);
+    setLoading(true);
+    setError(null);
 
-      try {
-        const walletAddress = user.wallet.address;
-        const accessToken = await getAccessToken();
+    try {
+      const walletAddress = user.wallet.address;
+      const accessToken = await getAccessToken();
 
-        if (!accessToken) {
-          throw new Error("No access token available");
-        }
-
-        const response = await fetch("/api/wallet/balance", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({
-            walletAddress,
-            network: "ethereum", // You can make this configurable
-          }),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || "Failed to fetch balances");
-        }
-
-        const result = await response.json();
-        setBalances(result.data.tokens);
-      } catch (err) {
-        setError("Failed to fetch balances");
-        console.error("Error fetching balances:", err);
-      } finally {
-        setLoading(false);
+      if (!accessToken) {
+        throw new Error("No access token available");
       }
-    };
 
-    fetchBalances();
+      const response = await fetch("/api/wallet/balance", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          walletAddress,
+          network: "ethereum", // You can make this configurable
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to fetch balances");
+      }
+
+      const result = await response.json();
+      setBalances(result.data.tokens);
+    } catch (err) {
+      setError("Failed to fetch balances");
+      console.error("Error fetching balances:", err);
+    } finally {
+      setLoading(false);
+    }
   }, [authenticated, user?.wallet?.address]);
+
+  useEffect(() => {
+    fetchBalances();
+  }, [fetchBalances]);
 
   if (!authenticated) {
     return (
