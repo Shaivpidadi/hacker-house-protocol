@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { usePrivy } from "@privy-io/react-auth";
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 
 interface BottomNavigationProps {
   activeTab?: string;
@@ -24,7 +25,14 @@ export function BottomNavigation({
 }: BottomNavigationProps) {
   const { user, logout, authenticated, ready } = usePrivy();
   const router = useRouter();
-  const pathname = router.pathname || window.location.pathname;
+  const [mounted, setMounted] = useState(false);
+
+  // Handle SSR - only run on client side
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const pathname = mounted ? window.location.pathname : "";
 
   // Hide navigation on login page
   if (pathname === "/login") {

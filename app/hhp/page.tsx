@@ -2,6 +2,9 @@ import { Metadata } from "next";
 import HhpActions from "@/components/hhp-actions";
 import ReservationManager from "@/components/reservation-manager";
 import PrivyGuard from "@/components/privy-guard";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "HHP Protocol - CryptoReal",
@@ -23,6 +26,41 @@ export default function HhpPage() {
         <HhpActions />
 
         <ReservationManager />
+
+        {/* Quick Actions */}
+        <div className="grid gap-4 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button asChild className="w-full">
+                <Link href="/explore">Browse Listings</Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full">
+                <Link href="/explore">Search Properties</Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Learn More</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button asChild variant="outline" className="w-full">
+                <Link href="https://docs.privy.io/" target="_blank">
+                  Privy Documentation
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full">
+                <Link href="https://docs.ethers.org/" target="_blank">
+                  Ethers.js Guide
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Protocol Information */}
         <div className="mt-12 p-6 bg-muted/50 rounded-lg">

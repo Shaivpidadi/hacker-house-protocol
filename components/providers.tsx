@@ -1,8 +1,23 @@
 "use client";
 
 import { PrivyProvider } from "@privy-io/react-auth";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useState } from "react";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
+  // Create a new QueryClient instance
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 60 * 1000, // 1 minute
+            gcTime: 5 * 60 * 1000, // 5 minutes
+          },
+        },
+      })
+  );
+
   // Check if required environment variables are set
   const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
   const clientId = process.env.NEXT_PUBLIC_PRIVY_CLIENT_ID;
@@ -46,19 +61,21 @@ PRIVY_APP_SECRET=your_app_secret_here`}
   }
 
   return (
-    <PrivyProvider
-      appId={appId}
-      clientId={clientId}
-      config={{
-        // Create embedded wallets for users who don't have a wallet
-        embeddedWallets: {
-          ethereum: {
-            createOnLogin: "users-without-wallets",
+    <QueryClientProvider client={queryClient}>
+      <PrivyProvider
+        appId={appId}
+        clientId={clientId}
+        config={{
+          // Create embedded wallets for users who don't have a wallet
+          embeddedWallets: {
+            ethereum: {
+              createOnLogin: "users-without-wallets",
+            },
           },
-        },
-      }}
-    >
-      {children}
-    </PrivyProvider>
+        }}
+      >
+        {children}
+      </PrivyProvider>
+    </QueryClientProvider>
   );
 }

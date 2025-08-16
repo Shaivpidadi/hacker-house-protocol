@@ -1,57 +1,74 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Search, Menu, Calendar, Users, MapPin } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { BottomNavigation } from "@/components/bottom-navigation"
-import { PropertyCard } from "@/components/explore/property-card"
+import { useState } from "react";
+import {
+  Search,
+  Menu,
+  Calendar,
+  Users,
+  MapPin,
+  Home,
+  Wallet,
+  RefreshCw,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { BottomNavigation } from "@/components/bottom-navigation";
+import { PropertyCard } from "@/components/explore/property-card";
+import { useEnhancedListings } from "@/hooks/use-hhp-data";
+import { formatEther } from "ethers";
+import Link from "next/link";
+import { formatAddress } from "@/lib/utils";
 
 export function Explore() {
-  const [activeTab, setActiveTab] = useState("Apartments")
+  const [activeTab, setActiveTab] = useState("Apartments");
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const properties = [
-    {
-      id: 1,
-      title: "Room in Palermo",
-      location: "ETH Global Buenos Aires",
-      price: 89,
-      rating: 4.85,
-      image: "/property-palermo-1.png",
-      amenities: ["Self check-in", "Outdoor entertainment"],
-      isFavorite: false,
+  // Fetch real HHP listings from subgraph with enhanced data
+  const { data, isLoading, error, refetch } = useEnhancedListings({
+    first: 50,
+    where: {
+      active: true,
+      ...(searchTerm && {
+        name_contains_nocase: searchTerm,
+        location_contains_nocase: searchTerm,
+      }),
     },
-    {
-      id: 2,
-      title: "Room in Palermo",
-      location: "ETH Global Buenos Aires",
-      price: 89,
-      rating: 4.85,
-      image: "/property-palermo-2.png",
-      amenities: ["Free Wifi", "Free parking", "Non-smoking", "Hot Tub"],
+  });
+
+  const listings = data?.listingCreatedBasics || [];
+  const metadataSets = data?.listingMetadataURISets || [];
+  const privateDataSets = data?.listingPrivateDataSets || [];
+
+  // Transform HHP listings to property format for existing PropertyCard component
+  const properties = listings.map((listing) => {
+    // Find associated metadata and private data
+    const metadata = metadataSets.find((m) => m.listingId === listing.id);
+    const privateData = privateDataSets.find((p) => p.listingId === listing.id);
+
+    return {
+      id: listing.id,
+      title: listing.name || `Listing #${listing.id}`,
+      location: listing.location || "Location TBD",
+      price: parseFloat(formatEther(listing.nightlyRate)),
+      rating: 4.85, // Default rating since HHP doesn't have ratings yet
+      image: "/property-palermo-1.png", // Default image
+      amenities: [
+        listing.requireProof ? "Proof Required" : "No Proof Required",
+        `Max ${listing.maxGuests} guests`,
+        "Blockchain verified",
+        `Builder: ${formatAddress(listing.builder)}`,
+        metadata?.metadataURI ? "Has Metadata" : "No Metadata",
+        privateData?.encPrivDataCid
+          ? "Private Data Available"
+          : "No Private Data",
+      ],
       isFavorite: false,
-    },
-    {
-      id: 3,
-      title: "Room in Palermo",
-      location: "ETH Global Buenos Aires",
-      price: 89,
-      rating: 4.85,
-      image: "/property-palermo-3.png",
-      amenities: ["Guest favourite", "5 Minutes Walk from Hackathon"],
-      isFavorite: false,
-    },
-    {
-      id: 4,
-      title: "Room in Palermo",
-      location: "ETH Global Buenos Aires",
-      price: 89,
-      rating: 4.85,
-      image: "/property-palermo-4.png",
-      amenities: ["Shared Apartment", "Kitchen", "Private Room"],
-      isFavorite: false,
-    },
-  ]
+      hhpData: listing, // Store original HHP data
+      metadata,
+      privateData,
+    };
+  });
 
   const events = [
     {
@@ -81,7 +98,7 @@ export function Explore() {
       image: "/property-palermo-3.png",
       tags: ["Solana", "Web3", "Gaming"],
     },
-  ]
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 max-w-md mx-auto">
@@ -91,9 +108,18 @@ export function Explore() {
           <div className="flex items-center gap-3 mb-6">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input placeholder="Search" className="pl-10 bg-gray-100 border-none rounded-xl h-12" />
+              <Input
+                placeholder="Search listings..."
+                className="pl-10 bg-gray-100 border-none rounded-xl h-12"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
             </div>
-            <Button variant="outline" size="icon" className="w-12 h-12 rounded-xl border-2 border-black bg-transparent">
+            <Button
+              variant="outline"
+              size="icon"
+              className="w-12 h-12 rounded-xl border-2 border-black bg-transparent"
+            >
               <Menu className="w-5 h-5" />
             </Button>
           </div>
@@ -109,7 +135,9 @@ export function Explore() {
               </div>
               <span
                 className={`text-sm font-medium transition-all duration-200 ${
-                  activeTab === "Apartments" ? "text-black border-b-2 border-black pb-1" : "text-gray-500"
+                  activeTab === "Apartments"
+                    ? "text-black border-b-2 border-black pb-1"
+                    : "text-gray-500"
                 }`}
               >
                 Apartments
@@ -124,7 +152,9 @@ export function Explore() {
               </div>
               <span
                 className={`text-sm font-medium transition-all duration-200 ${
-                  activeTab === "Events" ? "text-black border-b-2 border-black pb-1" : "text-gray-500"
+                  activeTab === "Events"
+                    ? "text-black border-b-2 border-black pb-1"
+                    : "text-gray-500"
                 }`}
               >
                 Events
@@ -138,9 +168,52 @@ export function Explore() {
       <div className="px-4 pb-24 space-y-4">
         {activeTab === "Apartments" ? (
           <>
-            {properties.map((property) => (
-              <PropertyCard key={property.id} property={property} />
-            ))}
+            {/* Loading State */}
+            {isLoading && (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                <p className="text-muted-foreground">Loading HHP listings...</p>
+              </div>
+            )}
+
+            {/* Error State */}
+            {error && (
+              <div className="text-center py-12">
+                <p className="text-destructive mb-4">Error loading listings</p>
+                <Button onClick={() => refetch()} variant="outline">
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Retry
+                </Button>
+              </div>
+            )}
+
+            {/* Listings */}
+            {!isLoading && !error && properties.length === 0 && (
+              <div className="text-center py-12">
+                <Home className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">No listings found</p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Try adjusting your search or check back later
+                </p>
+              </div>
+            )}
+
+            {!isLoading && !error && properties.length > 0 && (
+              <>
+                {properties.map((property) => (
+                  <PropertyCard key={property.id} property={property} />
+                ))}
+
+                {/* Results Count */}
+                <div className="text-center text-sm text-muted-foreground pt-4 border-t">
+                  Showing {properties.length} listings from HHP protocol
+                  {metadataSets.length > 0 &&
+                    ` • ${metadataSets.length} with metadata`}
+                  {privateDataSets.length > 0 &&
+                    ` • ${privateDataSets.length} with private data`}
+                </div>
+              </>
+            )}
           </>
         ) : (
           <>
@@ -152,7 +225,9 @@ export function Explore() {
                 <div className="h-48 bg-gradient-to-br from-orange-600 to-red-600 relative">
                   <div className="absolute inset-0 bg-black/20"></div>
                   <div className="absolute bottom-4 left-4 right-4">
-                    <h3 className="text-white font-bold text-lg mb-1">{event.title}</h3>
+                    <h3 className="text-white font-bold text-lg mb-1">
+                      {event.title}
+                    </h3>
                     <div className="flex items-center gap-4 text-white/90 text-sm">
                       <div className="flex items-center gap-1">
                         <MapPin className="w-3 h-3" />
@@ -189,5 +264,5 @@ export function Explore() {
 
       <BottomNavigation activeTab="Explore" />
     </div>
-  )
+  );
 }

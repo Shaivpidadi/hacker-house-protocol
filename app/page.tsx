@@ -23,9 +23,30 @@ import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import { usePrivy } from "@privy-io/react-auth";
 import { BottomNavigation } from "@/components/bottom-navigation";
+import { useDashboardSummary } from "@/hooks/use-hhp-data";
+import { useEnhancedListingsWithIPFS } from "@/hooks/use-enhanced-listings";
+import { formatEther } from "ethers";
+import { TrendingUp, RefreshCw } from "lucide-react";
 
 export default function HomePage() {
   const { user, authenticated, ready } = usePrivy();
+
+  // Fetch HHP dashboard data
+  const {
+    data: dashboardData,
+    isLoading: dashboardLoading,
+    error: dashboardError,
+    refetch: dashboardRefetch,
+  } = useDashboardSummary();
+
+  // Fetch HHP listings with IPFS metadata
+  const {
+    data: enhancedListings,
+    isLoading: listingsLoading,
+    error: listingsError,
+  } = useEnhancedListingsWithIPFS({
+    first: 6,
+  });
 
   const hackerHouses = [
     {
@@ -44,46 +65,38 @@ export default function HomePage() {
     },
   ];
 
-  const properties = [
-    {
-      id: 1,
-      title: "Room in Palermo",
-      location: "ETH Global Buenos Aires",
-      price: 89,
-      rating: 4.85,
-      image: "/property-palermo-1.png",
+  // Transform enhanced HHP listings to property format
+  const properties =
+    enhancedListings?.map((listing: any) => ({
+      id: listing.id,
+      title: listing.displayName,
+      location: listing.displayLocation,
+      price: parseFloat(formatEther(listing.nightlyRate)),
+      rating: 4.85, // Default rating
+      image: listing.metadata?.images?.[0] || "/property-palermo-1.png", // Use IPFS image if available
       amenities: [
-        { name: "Free Wifi", icon: Wifi },
-        { name: "Free parking", icon: Car },
-        { name: "Non-smoking", icon: Smoke },
-        { name: "Hot Tub", icon: Bath },
+        {
+          name: listing.requireProof ? "Proof Required" : "No Proof Required",
+          icon: Info,
+        },
+        { name: `Max ${listing.maxGuests} guests`, icon: Users },
+        { name: "Blockchain verified", icon: Home },
+        {
+          name: listing.hasMetadata ? "Has Metadata" : "No Metadata",
+          icon: Info,
+        },
+        {
+          name: listing.hasPrivateData
+            ? "Private Data Available"
+            : "No Private Data",
+          icon: Info,
+        },
       ],
-    },
-    {
-      id: 2,
-      title: "Room in Palermo",
-      location: "ETH Global Buenos Aires",
-      price: 89,
-      rating: 4.85,
-      image: "/property-palermo-2.png",
-      amenities: [
-        { name: "Self check-in", icon: Home },
-        { name: "Outdoor entertainment", icon: Users },
-      ],
-    },
-    {
-      id: 3,
-      title: "Room in Palermo",
-      location: "ETH Global Buenos Aires",
-      price: 89,
-      rating: 4.85,
-      image: "/property-palermo-3.png",
-      amenities: [
-        { name: "Guest favourite", icon: Heart },
-        { name: "5 Minutes Walk from Hackathon", icon: MapPin },
-      ],
-    },
-  ];
+      isFavorite: false,
+      hhpData: listing, // Store enhanced HHP data
+    })) || [];
+
+  console.log({ properties });
 
   const categories = [
     { name: "Developers", active: true },
@@ -148,6 +161,57 @@ export default function HomePage() {
         </div>
       </div>
 
+      {/* HHP Dashboard Section */}
+      {!dashboardLoading && !dashboardError && dashboardData && (
+        <div className="px-4 mb-6">
+          <div className="max-w-md mx-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-blue-600" />
+                HHP Protocol Stats
+              </h2>
+              <Button
+                onClick={() => dashboardRefetch()}
+                variant="ghost"
+                size="sm"
+                className="text-blue-500 hover:text-blue-600"
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              <Card className="text-center p-3 bg-white/80 backdrop-blur-sm">
+                <div className="text-2xl font-bold text-blue-600">
+                  {dashboardData.listingCreatedBasics.length}
+                </div>
+                <div className="text-xs text-gray-600">Listings</div>
+              </Card>
+              <Card className="text-center p-3 bg-white/80 backdrop-blur-sm">
+                <div className="text-2xl font-bold text-green-600">
+                  {dashboardData.reservationCreateds.length}
+                </div>
+                <div className="text-xs text-gray-600">Reservations</div>
+              </Card>
+              <Card className="text-center p-3 bg-white/80 backdrop-blur-sm">
+                <div className="text-2xl font-bold text-purple-600">
+                  {dashboardData.reservationFundeds.length > 0
+                    ? formatEther(
+                        dashboardData.reservationFundeds.reduce(
+                          (sum: bigint, fund: any) =>
+                            sum + BigInt(fund.amount || "0"),
+                          BigInt(0)
+                        )
+                      ).slice(0, 6)
+                    : "0"}
+                </div>
+                <div className="text-xs text-gray-600">Total Funded</div>
+              </Card>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Content */}
       <div className="max-w-md mx-auto px-4 pb-24">
         <h1 className="text-2xl font-bold mb-6 bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
@@ -200,62 +264,109 @@ export default function HomePage() {
           ))}
         </div>
 
-        {/* Property Cards */}
+        {/* HHP Property Cards */}
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold">HHP Listings</h2>
+          <Button
+            variant="ghost"
+            className="text-blue-500 font-medium hover:text-blue-600 transition-colors"
+            asChild
+          >
+            <Link href="/explore">View All</Link>
+          </Button>
+        </div>
         <div className="space-y-4 mb-8">
-          {properties.map((property) => (
-            <Link key={property.id} href={`/property/${property.id}`}>
-              <Card className="relative overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] bg-white">
-                <div className="relative h-64 bg-gradient-to-br from-gray-800 to-gray-600">
-                  <div className="absolute inset-0 bg-black/20"></div>
-                  <div className="absolute top-4 right-4 flex gap-2">
-                    <Button
-                      size="icon"
-                      variant="secondary"
-                      className="w-10 h-10 rounded-full bg-white/90 hover:bg-white transition-all duration-200 hover:scale-110"
-                    >
-                      <Heart className="w-5 h-5 text-green-500" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="secondary"
-                      className="w-10 h-10 rounded-full bg-white/90 hover:bg-white transition-all duration-200 hover:scale-110"
-                    >
-                      <Info className="w-5 h-5" />
-                    </Button>
-                  </div>
-                  <div className="absolute bottom-4 left-4 right-4 text-white">
-                    <h3 className="text-xl font-semibold mb-1">
-                      {property.title}
-                    </h3>
-                    <div className="flex items-center gap-1 mb-2">
-                      <MapPin className="w-4 h-4" />
-                      <span className="text-sm">{property.location}</span>
+          {/* Loading State */}
+          {listingsLoading && (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Loading HHP listings...</p>
+            </div>
+          )}
+
+          {/* Error State */}
+          {listingsError && (
+            <div className="text-center py-12">
+              <p className="text-destructive mb-4">
+                Error loading HHP listings
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Check your subgraph connection
+              </p>
+            </div>
+          )}
+
+          {/* No Listings */}
+          {!listingsLoading && !listingsError && properties.length === 0 && (
+            <div className="text-center py-12">
+              <Home className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">No HHP listings found</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Check back later or visit the explore page
+              </p>
+            </div>
+          )}
+
+          {/* Listings */}
+          {!listingsLoading &&
+            !listingsError &&
+            properties.length > 0 &&
+            properties.map((property: any) => (
+              <Link key={property.id} href={`/property/${property.id}`}>
+                <Card className="relative overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] bg-white">
+                  <div className="relative h-64 bg-gradient-to-br from-gray-800 to-gray-600">
+                    <div className="absolute inset-0 bg-black/20"></div>
+                    <div className="absolute top-4 right-4 flex gap-2">
+                      <Button
+                        size="icon"
+                        variant="secondary"
+                        className="w-10 h-10 rounded-full bg-white/90 hover:bg-white transition-all duration-200 hover:scale-110"
+                      >
+                        <Heart className="w-5 h-5 text-green-500" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="secondary"
+                        className="w-10 h-10 rounded-full bg-white/90 hover:bg-white transition-all duration-200 hover:scale-110"
+                      >
+                        <Info className="w-5 h-5" />
+                      </Button>
                     </div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="text-lg font-semibold">
-                        ${property.price}/Day
-                      </span>
-                      <div className="flex items-center gap-1">
-                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        <span className="text-sm">{property.rating}</span>
+                    <div className="absolute bottom-4 left-4 right-4 text-white">
+                      <h3 className="text-xl font-semibold mb-1">
+                        {property.title}
+                      </h3>
+                      <div className="flex items-center gap-1 mb-2">
+                        <MapPin className="w-4 h-4" />
+                        <span className="text-sm">{property.location}</span>
+                      </div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-lg font-semibold">
+                          ${property.price}/Day
+                        </span>
+                        <div className="flex items-center gap-1">
+                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                          <span className="text-sm">{property.rating}</span>
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {property.amenities.map(
+                          (amenity: any, index: number) => (
+                            <div
+                              key={index}
+                              className="flex items-center gap-1 px-3 py-1 bg-black/30 rounded-full text-xs backdrop-blur-sm"
+                            >
+                              <amenity.icon className="w-3 h-3" />
+                              <span>{amenity.name}</span>
+                            </div>
+                          )
+                        )}
                       </div>
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                      {property.amenities.map((amenity, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center gap-1 px-3 py-1 bg-black/30 rounded-full text-xs backdrop-blur-sm"
-                        >
-                          <amenity.icon className="w-3 h-3" />
-                          <span>{amenity.name}</span>
-                        </div>
-                      ))}
-                    </div>
                   </div>
-                </div>
-              </Card>
-            </Link>
-          ))}
+                </Card>
+              </Link>
+            ))}
         </div>
 
         <h2 className="text-lg font-semibold mb-4">Find Hacker Homies</h2>
