@@ -1,45 +1,76 @@
-"use client"
+"use client";
 
-import { Home, Search, Heart, Calendar, User, LogOut } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
-import { useAuth } from "@/lib/auth"
-import { useRouter } from "next/navigation"
+import {
+  Home,
+  Search,
+  Heart,
+  Calendar,
+  User,
+  LogOut,
+  Wallet,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { usePrivy } from "@privy-io/react-auth";
+import { useRouter } from "next/navigation";
 
 interface BottomNavigationProps {
-  activeTab?: string
+  activeTab?: string;
 }
 
-export function BottomNavigation({ activeTab = "Home" }: BottomNavigationProps) {
-  const { user, logout } = useAuth()
-  const router = useRouter()
+export function BottomNavigation({
+  activeTab = "Home",
+}: BottomNavigationProps) {
+  const { user, logout, authenticated, ready } = usePrivy();
+  const router = useRouter();
 
   const handleProfileClick = () => {
-    if (user) {
-      router.push("/profile")
+    if (authenticated && ready) {
+      router.push("/profile");
     } else {
-      router.push("/welcome")
+      router.push("/welcome");
     }
-  }
+  };
 
   const handleLogout = () => {
-    logout()
-    router.push("/welcome")
-  }
+    logout();
+    router.push("/welcome");
+  };
 
   const navItems = [
     { icon: Home, label: "Home", active: activeTab === "Home", href: "/" },
-    { icon: Search, label: "Explore", active: activeTab === "Explore", href: "/explore" },
-    { icon: Heart, label: "Favorites", active: activeTab === "Favorites", href: "/favorites" },
-    { icon: Calendar, label: "Hackstay", active: activeTab === "Hackstay", href: "/hackstay" },
+    {
+      icon: Search,
+      label: "Explore",
+      active: activeTab === "Explore",
+      href: "/explore",
+    },
+    {
+      icon: Heart,
+      label: "Favorites",
+      active: activeTab === "Favorites",
+      href: "/favorites",
+    },
+    {
+      icon: Calendar,
+      label: "Hackstay",
+      active: activeTab === "Hackstay",
+      href: "/hackstay",
+    },
+    {
+      icon: Wallet,
+      label: "Wallet",
+      active: activeTab === "Wallet",
+      href: "/wallet",
+    },
     {
       icon: User,
-      label: user ? "Profile" : "Login",
+      label: authenticated && ready ? "Profile" : "Login",
       active: activeTab === "Profile",
-      href: user ? "/profile" : "/welcome",
+      href: authenticated && ready ? "/profile" : "/welcome",
       onClick: handleProfileClick,
     },
-  ]
+  ];
 
   return (
     <div className="fixed bottom-0 left-0 right-0 glass-card border-t border-border shadow-lg">
@@ -54,10 +85,16 @@ export function BottomNavigation({ activeTab = "Home" }: BottomNavigationProps) 
                   onClick={item.onClick}
                 >
                   <item.icon
-                    className={`w-5 h-5 transition-colors ${item.active ? "text-primary" : "text-muted-foreground"}`}
+                    className={`w-5 h-5 transition-colors ${
+                      item.active ? "text-primary" : "text-muted-foreground"
+                    }`}
                   />
                   <span
-                    className={`text-xs transition-colors ${item.active ? "text-primary font-medium" : "text-muted-foreground"}`}
+                    className={`text-xs transition-colors ${
+                      item.active
+                        ? "text-primary font-medium"
+                        : "text-muted-foreground"
+                    }`}
                   >
                     {item.label}
                   </span>
@@ -69,10 +106,16 @@ export function BottomNavigation({ activeTab = "Home" }: BottomNavigationProps) 
                     className="flex flex-col items-center gap-1 h-auto py-2 px-3 transition-all duration-300 hover:scale-110 hover:bg-muted/50"
                   >
                     <item.icon
-                      className={`w-5 h-5 transition-colors ${item.active ? "text-primary" : "text-muted-foreground"}`}
+                      className={`w-5 h-5 transition-colors ${
+                        item.active ? "text-primary" : "text-muted-foreground"
+                      }`}
                     />
                     <span
-                      className={`text-xs transition-colors ${item.active ? "text-primary font-medium" : "text-muted-foreground"}`}
+                      className={`text-xs transition-colors ${
+                        item.active
+                          ? "text-primary font-medium"
+                          : "text-muted-foreground"
+                      }`}
                     >
                       {item.label}
                     </span>
@@ -81,7 +124,7 @@ export function BottomNavigation({ activeTab = "Home" }: BottomNavigationProps) 
               )}
             </div>
           ))}
-          {user && (
+          {authenticated && ready && (
             <Button
               variant="ghost"
               size="sm"
@@ -95,5 +138,5 @@ export function BottomNavigation({ activeTab = "Home" }: BottomNavigationProps) 
         <div className="h-1 bg-foreground/20 mx-auto w-32 rounded-full mb-2"></div>
       </div>
     </div>
-  )
+  );
 }
