@@ -1,0 +1,8 @@
+{
+  "arbitrum-sepolia": {
+    "HackerHouseProtocol": {
+      "address": "0xE633Ea91a3c78C5C29B04A6883AA970b19220cF9",
+      "startBlock": 184485647
+    }
+  }
+}

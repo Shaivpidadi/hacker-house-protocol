@@ -1,0 +1,6 @@
+node_modules/*
+node_modules
+.env
+assets/private.encrypt.key
+assets/.env
+assets/.env

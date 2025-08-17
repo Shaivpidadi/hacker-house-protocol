@@ -1,0 +1,16 @@
+type: collateral
+tokens:
+  - chainName: sepolia
+    standard: ERC20          # underlying collateral on origin
+    addressOrDenom: "0xCaC524BcA292aaade2DF8A05cC58F0a65B1B3bB9" # <— your tPYUSD on Sepolia
+  - chainName: arbitrumsepolia
+    standard: synthetic      # deploys hyPYUSD on Arbitrum Sepolia
+
+
+# type: collateral
+# tokens:
+#   - chainName: sepolia
+#     standard: ERC20
+#     addressOrDenom: "0x2f0a3FAD1F7891DE87797701DBB19a39E79A7465"
+#   - chainName: arbitrumsepolia
+#     standard: synthetic

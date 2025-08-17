@@ -1,0 +1,68 @@
+specVersion: 1.3.0
+indexerHints:
+  prune: auto
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: HackerHouseProtocol
+    network: arbitrum-sepolia
+    source:
+      address: "0xE633Ea91a3c78C5C29B04A6883AA970b19220cF9"
+      abi: HackerHouseProtocol
+      startBlock: 184485647
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - CoPayersSet
+        - EIP712DomainChanged
+        - FundsWithdrawn
+        - GuestAdded
+        - ListingCreatedBasic
+        - ListingMetadataURISet
+        - ListingPrivateDataSet
+        - ListingRequireProofUpdated
+        - ListingUpdatedBasic
+        - OwnershipTransferred
+        - ProtocolFeeUpdated
+        - ReservationCreated
+        - ReservationFunded
+        - TreasuryUpdated
+        - VerifierUpdated
+      abis:
+        - name: HackerHouseProtocol
+          file: ./abis/HackerHouseProtocol.json
+      eventHandlers:
+        - event: CoPayersSet(indexed uint256,address[],uint16[])
+          handler: handleCoPayersSet
+        - event: EIP712DomainChanged()
+          handler: handleEIP712DomainChanged
+        - event: FundsWithdrawn(indexed uint256,indexed address,uint256,uint256)
+          handler: handleFundsWithdrawn
+        - event: GuestAdded(indexed uint256,indexed address,indexed address)
+          handler: handleGuestAdded
+        - event: ListingCreatedBasic(indexed uint256,indexed address,indexed address,bytes32,bytes32,uint256,uint8,bool)
+          handler: handleListingCreatedBasic
+        - event: ListingMetadataURISet(indexed uint256,string)
+          handler: handleListingMetadataURISet
+        - event: ListingPrivateDataSet(indexed uint256,bytes32,string)
+          handler: handleListingPrivateDataSet
+        - event: ListingRequireProofUpdated(indexed uint256,bool)
+          handler: handleListingRequireProofUpdated
+        - event: ListingUpdatedBasic(indexed uint256,indexed address,indexed address,bytes32,bytes32,uint256,uint8,bool)
+          handler: handleListingUpdatedBasic
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+        - event: ProtocolFeeUpdated(uint96)
+          handler: handleProtocolFeeUpdated
+        - event: ReservationCreated(indexed uint256,indexed uint256,indexed address,uint64,uint64,uint256)
+          handler: handleReservationCreated
+        - event: ReservationFunded(indexed uint256,indexed address,uint256,uint256,bool)
+          handler: handleReservationFunded
+        - event: TreasuryUpdated(indexed address)
+          handler: handleTreasuryUpdated
+        - event: VerifierUpdated(indexed address)
+          handler: handleVerifierUpdated
+      file: ./src/hacker-house-protocol.ts

@@ -1,0 +1,756 @@
+[
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_treasury", "type": "address" }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "target", "type": "address" }
+    ],
+    "name": "AddressEmptyCode",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "account", "type": "address" }
+    ],
+    "name": "AddressInsufficientBalance",
+    "type": "error"
+  },
+  { "inputs": [], "name": "ECDSAInvalidSignature", "type": "error" },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "length", "type": "uint256" }
+    ],
+    "name": "ECDSAInvalidSignatureLength",
+    "type": "error"
+  },
+  {
+    "inputs": [{ "internalType": "bytes32", "name": "s", "type": "bytes32" }],
+    "name": "ECDSAInvalidSignatureS",
+    "type": "error"
+  },
+  { "inputs": [], "name": "FailedInnerCall", "type": "error" },
+  { "inputs": [], "name": "InvalidShortString", "type": "error" },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "owner", "type": "address" }
+    ],
+    "name": "OwnableInvalidOwner",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "account", "type": "address" }
+    ],
+    "name": "OwnableUnauthorizedAccount",
+    "type": "error"
+  },
+  { "inputs": [], "name": "ReentrancyGuardReentrantCall", "type": "error" },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "token", "type": "address" }
+    ],
+    "name": "SafeERC20FailedOperation",
+    "type": "error"
+  },
+  {
+    "inputs": [{ "internalType": "string", "name": "str", "type": "string" }],
+    "name": "StringTooLong",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "reservationId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "address[]",
+        "name": "payers",
+        "type": "address[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint16[]",
+        "name": "bps",
+        "type": "uint16[]"
+      }
+    ],
+    "name": "CoPayersSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [],
+    "name": "EIP712DomainChanged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "reservationId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "builderAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "protocolFee",
+        "type": "uint256"
+      }
+    ],
+    "name": "FundsWithdrawn",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "reservationId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "addedBy",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "guest",
+        "type": "address"
+      }
+    ],
+    "name": "GuestAdded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "listingId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "builder",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "paymentToken",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "nameHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "locationHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "nightlyRate",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint8",
+        "name": "maxGuests",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "requireProof",
+        "type": "bool"
+      }
+    ],
+    "name": "ListingCreatedBasic",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "listingId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "metadataURI",
+        "type": "string"
+      }
+    ],
+    "name": "ListingMetadataURISet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "listingId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "privDataHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "encPrivDataCid",
+        "type": "string"
+      }
+    ],
+    "name": "ListingPrivateDataSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "listingId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "requireProof",
+        "type": "bool"
+      }
+    ],
+    "name": "ListingRequireProofUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "listingId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "builder",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "paymentToken",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "nameHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "locationHash",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "nightlyRate",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint8",
+        "name": "maxGuests",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "active",
+        "type": "bool"
+      }
+    ],
+    "name": "ListingUpdatedBasic",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint96",
+        "name": "feeBps",
+        "type": "uint96"
+      }
+    ],
+    "name": "ProtocolFeeUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "reservationId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "listingId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "renter",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint64",
+        "name": "startDate",
+        "type": "uint64"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint64",
+        "name": "endDate",
+        "type": "uint64"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "totalDue",
+        "type": "uint256"
+      }
+    ],
+    "name": "ReservationCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "reservationId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "payer",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "newTotalPaid",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "activated",
+        "type": "bool"
+      }
+    ],
+    "name": "ReservationFunded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "treasury",
+        "type": "address"
+      }
+    ],
+    "name": "TreasuryUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "verifier",
+        "type": "address"
+      }
+    ],
+    "name": "VerifierUpdated",
+    "type": "event"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "reservationId", "type": "uint256" },
+      { "internalType": "address", "name": "guest", "type": "address" }
+    ],
+    "name": "addGuest",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "string", "name": "name", "type": "string" },
+      { "internalType": "string", "name": "location", "type": "string" },
+      { "internalType": "string", "name": "metadataURI", "type": "string" },
+      { "internalType": "address", "name": "paymentToken", "type": "address" },
+      { "internalType": "uint256", "name": "nightlyRate", "type": "uint256" },
+      { "internalType": "uint8", "name": "maxGuests", "type": "uint8" },
+      { "internalType": "bytes32", "name": "privDataHash", "type": "bytes32" },
+      { "internalType": "string", "name": "encPrivDataCid", "type": "string" },
+      { "internalType": "bool", "name": "requireProof", "type": "bool" }
+    ],
+    "name": "createListing",
+    "outputs": [{ "internalType": "uint256", "name": "id", "type": "uint256" }],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "components": [
+          { "internalType": "uint256", "name": "listingId", "type": "uint256" },
+          { "internalType": "uint64", "name": "startDate", "type": "uint64" },
+          { "internalType": "uint64", "name": "endDate", "type": "uint64" },
+          { "internalType": "uint256", "name": "nights", "type": "uint256" },
+          {
+            "internalType": "address[]",
+            "name": "payers",
+            "type": "address[]"
+          },
+          { "internalType": "uint16[]", "name": "bps", "type": "uint16[]" }
+        ],
+        "internalType": "struct HackerHouseProtocol.CreateResArgs",
+        "name": "a",
+        "type": "tuple"
+      },
+      {
+        "components": [
+          { "internalType": "uint256", "name": "expiry", "type": "uint256" },
+          { "internalType": "uint256", "name": "nonce", "type": "uint256" },
+          { "internalType": "bytes", "name": "sig", "type": "bytes" }
+        ],
+        "internalType": "struct HackerHouseProtocol.EligibilityProof",
+        "name": "p",
+        "type": "tuple"
+      }
+    ],
+    "name": "createReservation",
+    "outputs": [
+      { "internalType": "uint256", "name": "rid", "type": "uint256" }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "eip712Domain",
+    "outputs": [
+      { "internalType": "bytes1", "name": "fields", "type": "bytes1" },
+      { "internalType": "string", "name": "name", "type": "string" },
+      { "internalType": "string", "name": "version", "type": "string" },
+      { "internalType": "uint256", "name": "chainId", "type": "uint256" },
+      {
+        "internalType": "address",
+        "name": "verifyingContract",
+        "type": "address"
+      },
+      { "internalType": "bytes32", "name": "salt", "type": "bytes32" },
+      { "internalType": "uint256[]", "name": "extensions", "type": "uint256[]" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "reservationId", "type": "uint256" },
+      { "internalType": "uint256", "name": "amount", "type": "uint256" }
+    ],
+    "name": "fundReservation",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "reservationId", "type": "uint256" }
+    ],
+    "name": "getReservationGuests",
+    "outputs": [
+      { "internalType": "address[]", "name": "", "type": "address[]" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "reservationId", "type": "uint256" }
+    ],
+    "name": "getReservationPayers",
+    "outputs": [
+      { "internalType": "address[]", "name": "", "type": "address[]" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "reservationId", "type": "uint256" }
+    ],
+    "name": "getReservationSplitsBps",
+    "outputs": [{ "internalType": "uint16[]", "name": "", "type": "uint16[]" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "name": "listings",
+    "outputs": [
+      { "internalType": "address", "name": "builder", "type": "address" },
+      { "internalType": "string", "name": "name", "type": "string" },
+      { "internalType": "string", "name": "location", "type": "string" },
+      { "internalType": "string", "name": "metadataURI", "type": "string" },
+      { "internalType": "address", "name": "paymentToken", "type": "address" },
+      { "internalType": "uint256", "name": "nightlyRate", "type": "uint256" },
+      { "internalType": "uint8", "name": "maxGuests", "type": "uint8" },
+      { "internalType": "bool", "name": "active", "type": "bool" },
+      { "internalType": "bytes32", "name": "privDataHash", "type": "bytes32" },
+      { "internalType": "string", "name": "encPrivDataCid", "type": "string" },
+      { "internalType": "bool", "name": "requireProof", "type": "bool" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "nextListingId",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "nextReservationId",
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "protocolFeeBps",
+    "outputs": [{ "internalType": "uint96", "name": "", "type": "uint96" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+    "name": "reservations",
+    "outputs": [
+      { "internalType": "uint256", "name": "listingId", "type": "uint256" },
+      { "internalType": "address", "name": "renter", "type": "address" },
+      { "internalType": "uint64", "name": "startDate", "type": "uint64" },
+      { "internalType": "uint64", "name": "endDate", "type": "uint64" },
+      { "internalType": "uint256", "name": "totalDue", "type": "uint256" },
+      { "internalType": "uint256", "name": "amountPaid", "type": "uint256" },
+      { "internalType": "bool", "name": "active", "type": "bool" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "uint96", "name": "_bps", "type": "uint96" }],
+    "name": "setProtocolFeeBps",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "_treasury", "type": "address" }
+    ],
+    "name": "setTreasury",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "address", "name": "v", "type": "address" }],
+    "name": "setVerifier",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "address", "name": "newOwner", "type": "address" }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "treasury",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "listingId", "type": "uint256" },
+      { "internalType": "string", "name": "name", "type": "string" },
+      { "internalType": "string", "name": "location", "type": "string" },
+      { "internalType": "string", "name": "metadataURI", "type": "string" },
+      { "internalType": "address", "name": "paymentToken", "type": "address" },
+      { "internalType": "uint256", "name": "nightlyRate", "type": "uint256" },
+      { "internalType": "uint8", "name": "maxGuests", "type": "uint8" },
+      { "internalType": "bool", "name": "active", "type": "bool" }
+    ],
+    "name": "updateListing",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "listingId", "type": "uint256" },
+      { "internalType": "bytes32", "name": "privDataHash", "type": "bytes32" },
+      { "internalType": "string", "name": "encPrivDataCid", "type": "string" }
+    ],
+    "name": "updateListingPrivateData",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "listingId", "type": "uint256" },
+      { "internalType": "bool", "name": "requireProof", "type": "bool" }
+    ],
+    "name": "updateListingRequireProof",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }],
+    "name": "usedProof",
+    "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "verifier",
+    "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "reservationId", "type": "uint256" },
+      { "internalType": "address", "name": "to", "type": "address" }
+    ],
+    "name": "withdraw",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]
