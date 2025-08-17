@@ -1,6 +1,6 @@
 # Wallet Setup Guide
 
-This guide explains how to set up the wallet functionality in your CryptoReal app.
+This guide explains how to set up the wallet functionality in your Hacker House Protocol app.
 
 ## Prerequisites
 

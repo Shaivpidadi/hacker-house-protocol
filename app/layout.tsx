@@ -17,7 +17,7 @@ const openSans = Open_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "CryptoReal - Crypto Rental & Co-Pay App",
+  title: "Hacker House Protocol - Crypto Rental & Co-Pay App",
   description:
     "Airbnb-like platform for crypto rentals and hackathon accommodations",
   generator: "v0.app",

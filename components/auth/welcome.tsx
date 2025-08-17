@@ -31,7 +31,7 @@ export function Welcome() {
             Welcome to
           </h1>
           <h1 className="text-3xl font-bold gradient-primary bg-clip-text text-transparent">
-            CryptoReal
+            Hacker House Protocol
           </h1>
           <p className="text-muted-foreground mt-4">
             Your crypto rental & co-pay platform

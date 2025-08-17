@@ -1,6 +1,6 @@
 # HHP Protocol Integration
 
-This document explains how the Hacker House Protocol (HHP) has been integrated into the CryptoReal application.
+This document explains how the Hacker House Protocol (HHP) has been integrated into the Hacker House Protocol application.
 
 ## Overview
 

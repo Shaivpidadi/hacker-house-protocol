@@ -93,7 +93,7 @@ export default function ProfilePage() {
                   user?.wallet?.address?.slice(0, 6) +
                     "..." +
                     user?.wallet?.address?.slice(-4) ||
-                  "hacker@cryptoreal.com"}
+                  "hacker@Hacker House Protocol.com"}
               </p>
             </div>
           </div>

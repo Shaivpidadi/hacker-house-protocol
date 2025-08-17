@@ -7,7 +7,7 @@ import PrivyGuard from "@/components/privy-guard";
 import HhpActions from "@/components/hhp-actions";
 
 export const metadata: Metadata = {
-  title: "Wallet Dashboard - CryptoReal",
+  title: "Wallet Dashboard - Hacker House Protocol",
   description: "Manage your wallet, view balances, and connect accounts",
 };
 
@@ -47,8 +47,8 @@ export default function WalletPage() {
               What are NOW tokens?
             </h3>
             <p>
-              NOW tokens are the native utility tokens used within the
-              CryptoReal ecosystem for payments, rewards, and governance.
+              NOW tokens are the native utility tokens used within the Hacker
+              House Protocol ecosystem for payments, rewards, and governance.
             </p>
           </div>
           <div>

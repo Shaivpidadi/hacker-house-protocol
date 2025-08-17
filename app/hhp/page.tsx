@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "HHP Protocol - CryptoReal",
+  title: "HHP Protocol - Hacker House Protocol",
   description: "Interact with the Hacker House Protocol smart contract",
 };
 
