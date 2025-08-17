@@ -220,3 +220,7 @@ Handlers map directly to smart contract events (e.g., `handleListingCreated`, `h
 
 4.  **Lowest Priority: Privy**
     - Serves as the wallet connector. It can be easily swapped with other solutions and does not handle sensitive user data.
+  
+
+
+Important Note: On the submission dashboard we got the following message: "Too many lines changed in a single commit", but this is because we merge 3 different repo (app, subgraph and Contracts) and turned this into one mono-repo for submission.
