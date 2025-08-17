@@ -1,6 +1,6 @@
 # Hacker House Protocol (Mono-Repo)
 
-**What this demo shows (3 min):**
+**What this repo shows:**
 
 - Create a **listing** on Arbitrum Sepolia with public + private metadata on IPFS
 - Bridge **PYUSD ➜ hyPYUSD** using **Hyperlane Warp Route** (Sepolia → Arbitrum Sepolia)
@@ -224,34 +224,3 @@ Handlers map directly to smart contract events (e.g., `handleListingCreated`, `h
 
 4.  **Lowest Priority: Privy**
     - Serves as the wallet connector. It can be easily swapped with other solutions and does not handle sensitive user data.
-
----
-
-### Immediate Next Actions
-
-1.  **Configure Payment Token:**
-
-    - Set the deployed `hyPYUSD` address in the application configuration as the default for new listings.
-
-2.  **Publish Subgraph:**
-
-    - Scaffold `subgraph.yaml`, `schema.graphql`, and event mappings.
-    - Deploy to The Graph Studio, pointing to the HHP contract on Arbitrum Sepolia.
-    - Refactor the frontend to use GraphQL queries instead of direct RPC calls.
-
-3.  **Implement HHP Frontend Calls:**
-
-    - **Create Listing:** Integrate the IPFS upload script with the `createListing` contract call.
-    - **Create Reservation:**
-      - If proof is required, call the verifier endpoint to get the signature.
-      - Otherwise, send a blank proof.
-    - **Fund Reservation:**
-      - If the user's `hyPYUSD` balance is insufficient, display a "Bridge with Hyperlane" modal.
-      - Otherwise, implement the `approve` and `fundReservation` flow.
-
-4.  **Build Verifier Service (if needed):**
-
-    - Create a simple Node.js endpoint (`POST /attest`) that takes a `user` and `listingId`, verifies their POAP on Gnosis, and returns the EIP-712 signature.
-
-5.  **Implement Builder Payout:**
-    - Add a simple UI button for hosts to call `withdraw(reservationId, to)`, displaying the fee split data fetched from the subgraph.
