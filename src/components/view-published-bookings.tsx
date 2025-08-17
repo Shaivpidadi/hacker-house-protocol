@@ -1,16 +1,27 @@
 import { Booking } from '@/schema';
-import { useQuery } from '@graphprotocol/hypergraph-react';
-import { useState } from 'react';
+import { useQuery, useSpaces } from '@graphprotocol/hypergraph-react';
+import { useState, useEffect } from 'react';
 
 export function ViewPublishedBookings() {
+  const { data: publicSpaces } = useSpaces({ mode: 'public' });
+  const [selectedSpace, setSelectedSpace] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
+  // auto-select first public space if none selected
+  useEffect(() => {
+    if (publicSpaces && publicSpaces.length > 0 && !selectedSpace) {
+      setSelectedSpace(publicSpaces[0].id);
+    }
+  }, [publicSpaces, selectedSpace]);
+
   const { data: bookings, isPending, error } = useQuery(Booking, {
     mode: 'public',
-    filter: {
+    space: selectedSpace || undefined,
+    first: 100,
+    filter: searchTerm ? {
       notes: { contains: searchTerm }
-    },
+    } : undefined,
     include: {
       property: {},
       hackers: {},
@@ -25,6 +36,15 @@ export function ViewPublishedBookings() {
     return true;
   });
 
+  if (!selectedSpace) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+        <p className="ml-3 text-gray-600">Loading public spaces...</p>
+      </div>
+    );
+  }
+
   if (isPending) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -36,7 +56,15 @@ export function ViewPublishedBookings() {
   if (error) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-        <p className="text-red-800">Error loading bookings: {error.message}</p>
+        <div className="flex items-center">
+          <svg className="w-5 h-5 text-red-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+          </svg>
+          <p className="text-red-800">Error loading bookings: {error.message}</p>
+        </div>
+        <p className="text-red-600 text-sm mt-2">
+          This might be because there are no bookings in this space, or the space doesn't contain booking data.
+        </p>
       </div>
     );
   }
@@ -77,9 +105,17 @@ export function ViewPublishedBookings() {
           </h3>
         </div>
 
-        {filteredBookings?.length === 0 ? (
+        {!isPending && filteredBookings?.length === 0 ? (
           <div className="p-6 text-center text-gray-500">
-            {bookings?.length === 0 ? 'No bookings found in your public space.' : 'No bookings match your filters.'}
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No Bookings Found</h3>
+            <p className="text-gray-600">
+              {searchTerm ? 'No bookings match your search criteria.' : 'This space doesn\'t contain any booking data yet.'}
+            </p>
           </div>
         ) : (
           <div className="divide-y divide-gray-200">

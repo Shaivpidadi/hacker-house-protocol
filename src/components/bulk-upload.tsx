@@ -222,6 +222,12 @@ function BulkUploadContent() {
           successCount++;
         } catch (error) {
           console.error(`Error processing booking ${i + 1}:`, error);
+          console.error('Booking data that failed:', bookings[i]);
+          console.error('Full error details:', {
+            message: error instanceof Error ? error.message : 'Unknown error',
+            stack: error instanceof Error ? error.stack : undefined,
+            error: error
+          });
           errorCount++;
         }
 

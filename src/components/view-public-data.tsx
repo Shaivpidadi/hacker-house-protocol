@@ -22,28 +22,28 @@ export function ViewPublicData() {
   // query entities from public space - only when space is selected
   const { data: bookings } = useQuery(Booking, { 
     mode: 'public',
-    space: selectedSpace,
+    space: selectedSpace || undefined,
     filter: searchTerm ? { notes: { contains: searchTerm } } : undefined,
     include: { property: {}, hackers: {}, landlord: {} }
   });
   
   const { data: properties } = useQuery(Property, { 
     mode: 'public',
-    space: selectedSpace,
+    space: selectedSpace || undefined,
     filter: searchTerm ? { name: { contains: searchTerm } } : undefined,
     include: { image: {} }
   });
   
   const { data: hackers } = useQuery(Hacker, { 
     mode: 'public',
-    space: selectedSpace,
+    space: selectedSpace || undefined,
     filter: searchTerm ? { name: { contains: searchTerm } } : undefined,
     include: { avatar: {} }
   });
   
   const { data: landlords } = useQuery(Landlord, { 
     mode: 'public',
-    space: selectedSpace,
+    space: selectedSpace || undefined,
     filter: searchTerm ? { name: { contains: searchTerm } } : undefined,
     include: { avatar: {} }
   });

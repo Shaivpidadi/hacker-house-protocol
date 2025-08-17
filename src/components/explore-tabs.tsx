@@ -7,6 +7,7 @@ type Tab = {
 };
 
 const tabs: Tab[] = [
+  { label: 'Spaces', to: '/explore-public-knowledge' },
   { label: 'Projects', to: '/explore-public-knowledge/projects' },
   { label: 'dApps', to: '/explore-public-knowledge/dapps' },
   { label: 'Investment Rounds', to: '/explore-public-knowledge/investment-rounds' },

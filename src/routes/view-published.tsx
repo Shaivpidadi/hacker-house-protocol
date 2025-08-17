@@ -2,7 +2,10 @@ import { ViewPublishedProperties } from '@/components/view-published-properties'
 import { ViewPublishedHackers } from '@/components/view-published-hackers';
 import { ViewPublishedBookings } from '@/components/view-published-bookings';
 import { ViewPublicData } from '@/components/view-public-data';
-import { TestPublicQuery } from '@/components/test-public-query';
+import { DataDiagnostics } from '@/components/data-diagnostics';
+import { PrivateSpaceDiagnostics } from '@/components/private-space-diagnostics';
+import { SimpleBookingTest } from '@/components/simple-booking-test';
+import { SpaceChecker } from '@/components/space-checker';
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 
@@ -11,7 +14,7 @@ export const Route = createFileRoute('/view-published')({
 });
 
 function ViewPublishedPage() {
-  const [activeTab, setActiveTab] = useState<'properties' | 'hackers' | 'bookings' | 'public' | 'test'>('bookings');
+  const [activeTab, setActiveTab] = useState<'properties' | 'hackers' | 'bookings' | 'public' | 'diagnostics' | 'private-diagnostics' | 'simple-test' | 'spaces'>('simple-test');
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -89,11 +92,12 @@ function ViewPublishedPage() {
                   Public Data ({activeTab === 'public' ? 'Active' : ''})
                 </div>
               </button>
+
               <button
-                onClick={() => setActiveTab('test')}
+                onClick={() => setActiveTab('diagnostics')}
                 className={`px-6 py-4 text-sm font-medium transition-colors ${
-                  activeTab === 'test'
-                    ? 'bg-green-50 text-green-700 border-b-2 border-green-700'
+                  activeTab === 'diagnostics'
+                    ? 'bg-red-50 text-red-700 border-b-2 border-red-700'
                     : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                 }`}
               >
@@ -101,7 +105,53 @@ function ViewPublishedPage() {
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  Test Queries ({activeTab === 'test' ? 'Active' : ''})
+                  Public Diagnostics ({activeTab === 'diagnostics' ? 'Active' : ''})
+                </div>
+              </button>
+              <button
+                onClick={() => setActiveTab('private-diagnostics')}
+                className={`px-6 py-4 text-sm font-medium transition-colors ${
+                  activeTab === 'private-diagnostics'
+                    ? 'bg-green-50 text-green-700 border-b-2 border-green-700'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                  Private Diagnostics ({activeTab === 'private-diagnostics' ? 'Active' : ''})
+                </div>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('simple-test')}
+                className={`px-6 py-4 text-sm font-medium transition-colors ${
+                  activeTab === 'simple-test'
+                    ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-700'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Simple Test ({activeTab === 'simple-test' ? 'Active' : ''})
+                </div>
+              </button>
+              <button
+                onClick={() => setActiveTab('spaces')}
+                className={`px-6 py-4 text-sm font-medium transition-colors ${
+                  activeTab === 'spaces'
+                    ? 'bg-green-50 text-green-700 border-b-2 border-green-700'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                  Check Spaces ({activeTab === 'spaces' ? 'Active' : ''})
                 </div>
               </button>
             </nav>
@@ -114,7 +164,10 @@ function ViewPublishedPage() {
           {activeTab === 'hackers' && <ViewPublishedHackers />}
           {activeTab === 'bookings' && <ViewPublishedBookings />}
           {activeTab === 'public' && <ViewPublicData />}
-          {activeTab === 'test' && <TestPublicQuery />}
+          {activeTab === 'diagnostics' && <DataDiagnostics />}
+          {activeTab === 'private-diagnostics' && <PrivateSpaceDiagnostics />}
+          {activeTab === 'simple-test' && <SimpleBookingTest />}
+          {activeTab === 'spaces' && <SpaceChecker />}
         </div>
 
         {/* info section */}

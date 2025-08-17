@@ -1,15 +1,24 @@
 import { Hacker } from '@/schema';
-import { useQuery } from '@graphprotocol/hypergraph-react';
+import { useQuery, useSpaces } from '@graphprotocol/hypergraph-react';
 import { GraphImage } from '@/components/graph-image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export function ViewPublishedHackers() {
+  const { data: publicSpaces } = useSpaces({ mode: 'public' });
+  const [selectedSpace, setSelectedSpace] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
+
+  // auto-select first public space if none selected
+  useEffect(() => {
+    if (publicSpaces && publicSpaces.length > 0 && !selectedSpace) {
+      setSelectedSpace(publicSpaces[0].id);
+    }
+  }, [publicSpaces, selectedSpace]);
 
   // query hackers from the public space
   const { data: hackers, isPending, error } = useQuery(Hacker, {
     mode: 'public',
-    space: 'public', // this will query from the public space
+    space: selectedSpace || undefined,
     first: 100,
     include: { avatar: {} },
     filter: {
@@ -18,6 +27,15 @@ export function ViewPublishedHackers() {
       },
     },
   });
+
+  if (!selectedSpace) {
+    return (
+      <div className="text-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Loading public spaces...</p>
+      </div>
+    );
+  }
 
   if (error) {
     return (
