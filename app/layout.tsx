@@ -1,9 +1,7 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
-
-import { Layout } from '@/Components/Layout';
-import Providers from './Providers';
 import './globals.css';
+import Providers from './Providers';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -16,20 +14,20 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Hypergraph + Nextjs',
-  description: 'Hypergraph-enabled nextjs starter app',
+  title: 'Hackerhouse Protocol',
+  description: 'Buenos Aires Ethereum Hackathon',
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en" className="h-full">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased h-full`}>
+    <html lang="en">
+      <body>
         <Providers>
-          <Layout>{children}</Layout>
+          {children}
         </Providers>
       </body>
     </html>

@@ -11,8 +11,10 @@ export function useProperties(filters?: {
   bedrooms?: number;
   wifi?: boolean;
 }) {
-  return useQuery(Property, {
-    mode: 'private',
+  console.log('🔍 useProperties hook called with filters:', filters);
+  
+  const result = useQuery(Property, {
+    mode: 'public', // Changed from 'private' to 'public'
     filter: filters ? {
       ...(filters.status && { status: { is: filters.status } }),
       ...(filters.location && { location: { contains: filters.location } }),
@@ -22,6 +24,9 @@ export function useProperties(filters?: {
       ...(filters.wifi !== undefined && { wifi: { is: filters.wifi } })
     } : undefined
   });
+  
+  console.log('📊 useProperties result:', result);
+  return result;
 }
 
 export function useCreateProperty() {
@@ -33,7 +38,7 @@ export function useUpdateProperty() {
 }
 
 export function useDeleteProperty() {
-  return useDeleteEntity({ space: 'private' });
+  return useDeleteEntity({ space: 'public' }); // Changed from 'private'
 }
 
 // ===== BOOKING HOOKS =====
@@ -45,7 +50,7 @@ export function useBookings(filters?: {
   status?: string;
 }) {
   return useQuery(Booking, {
-    mode: 'private',
+    mode: 'public', // Changed from 'private' to 'public'
     filter: filters?.status ? { status: { is: filters.status } } : undefined
   });
 }
@@ -59,7 +64,7 @@ export function useUpdateBooking() {
 }
 
 export function useDeleteBooking() {
-  return useDeleteEntity({ space: 'private' });
+  return useDeleteEntity({ space: 'public' }); // Changed from 'private'
 }
 
 // ===== HACKER HOOKS =====
@@ -68,7 +73,7 @@ export function useHackers(filters?: {
   walletAddress?: string;
 }) {
   return useQuery(Hacker, {
-    mode: 'private',
+    mode: 'public', // Changed from 'private' to 'public'
     filter: filters?.walletAddress ? { walletAddress: { is: filters.walletAddress } } : undefined
   });
 }
@@ -82,7 +87,7 @@ export function useUpdateHacker() {
 }
 
 export function useDeleteHacker() {
-  return useDeleteEntity({ space: 'private' });
+  return useDeleteEntity({ space: 'public' }); // Changed from 'private'
 }
 
 // ===== LANDLORD HOOKS =====
@@ -91,7 +96,7 @@ export function useLandlords(filters?: {
   walletAddress?: string;
 }) {
   return useQuery(Landlord, {
-    mode: 'private',
+    mode: 'public', // Changed from 'private' to 'public'
     filter: filters?.walletAddress ? { walletAddress: { is: filters.walletAddress } } : undefined
   });
 }
@@ -105,7 +110,7 @@ export function useUpdateLandlord() {
 }
 
 export function useDeleteLandlord() {
-  return useDeleteEntity({ space: 'private' });
+  return useDeleteEntity({ space: 'public' }); // Changed from 'private'
 }
 
 // ===== EVENT HOOKS =====
@@ -115,7 +120,7 @@ export function useEvents(filters?: {
   organizer?: string;
 }) {
   return useQuery(Event, {
-    mode: 'private',
+    mode: 'public', // Changed from 'private' to 'public'
     filter: filters?.organizer ? { organizer: { contains: filters.organizer } } : undefined
   });
 }
@@ -129,7 +134,7 @@ export function useUpdateEvent() {
 }
 
 export function useDeleteEvent() {
-  return useDeleteEntity({ space: 'private' });
+  return useDeleteEntity({ space: 'public' }); // Changed from 'private'
 }
 
 // ===== REVIEW HOOKS =====
@@ -139,7 +144,7 @@ export function useReviews(filters?: {
   hackerWallet?: string;
 }) {
   return useQuery(Review, {
-    mode: 'private'
+    mode: 'public' // Changed from 'private' to 'public'
   });
 }
 
@@ -152,7 +157,7 @@ export function useUpdateReview() {
 }
 
 export function useDeleteReview() {
-  return useDeleteEntity({ space: 'private' });
+  return useDeleteEntity({ space: 'public' }); // Changed from 'private'
 }
 
 // ===== IMAGE HOOKS =====
@@ -164,37 +169,37 @@ export function useCreateImage() {
 // ===== ANALYTICS HOOKS =====
 
 export function usePopularProperties() {
-  return useQuery(Property, { mode: 'private' });
+  return useQuery(Property, { mode: 'public' });
 }
 
 export function usePaymentAnalytics() {
-  return useQuery(BookingPayment, { mode: 'private' });
+  return useQuery(BookingPayment, { mode: 'public' });
 }
 
 export function useOccupancyRates() {
   return useQuery(Booking, {
-    mode: 'private',
+    mode: 'public',
     filter: { status: { is: 'completed' } }
   });
 }
 
 export function useSeasonalTrends() {
   return useQuery(Booking, {
-    mode: 'private',
+    mode: 'public',
     filter: { status: { is: 'completed' } }
   });
 }
 
 export function useHackerTravelPatterns(hackerWallet: string) {
   return useQuery(Booking, {
-    mode: 'private',
+    mode: 'public',
     filter: { status: { is: 'completed' } }
   });
 }
 
 export function useLandlordPerformance(landlordWallet: string) {
   return useQuery(Landlord, {
-    mode: 'private',
+    mode: 'public',
     filter: { walletAddress: { is: landlordWallet } }
   });
 }
@@ -203,13 +208,13 @@ export function useLandlordPerformance(landlordWallet: string) {
 
 export function usePropertyAvailability(propertyId: string, startDate: string, endDate: string) {
   return useQuery(Booking, {
-    mode: 'private'
+    mode: 'public'
   });
 }
 
 export function useHackerRoommateHistory(hackerWalletAddress: string) {
   return useQuery(Booking, {
-    mode: 'private',
+    mode: 'public',
     filter: { status: { is: 'completed' } }
   });
 }
