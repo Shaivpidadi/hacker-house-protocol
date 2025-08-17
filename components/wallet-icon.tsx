@@ -29,7 +29,7 @@ export default function WalletIcon({
 
   if (!authenticated) {
     return (
-      <Link href="/wallet">
+      <Link href="/login">
         <Button
           variant="ghost"
           size="sm"
@@ -43,7 +43,7 @@ export default function WalletIcon({
   }
 
   return (
-    <Link href="/wallet">
+    <Link href="/login">
       <Button
         variant="ghost"
         size="sm"

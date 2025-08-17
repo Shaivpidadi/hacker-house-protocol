@@ -40,7 +40,7 @@ export default function ProfilePage() {
           <p className="text-muted-foreground mb-6">
             Connect your wallet to view your profile
           </p>
-          <Button onClick={() => (window.location.href = "/wallet")}>
+          <Button onClick={() => (window.location.href = "/login")}>
             Go to Wallet
           </Button>
         </div>
@@ -130,7 +130,7 @@ export default function ProfilePage() {
               ) : (
                 <Button
                   size="sm"
-                  onClick={() => (window.location.href = "/wallet")}
+                  onClick={() => (window.location.href = "/login")}
                   className="gradient-primary text-primary-foreground glass"
                 >
                   Connect
