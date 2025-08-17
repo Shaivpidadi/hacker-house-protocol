@@ -9,6 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ViewPublishedRouteImport } from './routes/view-published'
+import { Route as PublishKnowledgeRouteImport } from './routes/publish-knowledge'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ExplorePublicKnowledgeRouteImport } from './routes/explore-public-knowledge'
 import { Route as AuthenticateSuccessRouteImport } from './routes/authenticate-success'
@@ -21,6 +23,16 @@ import { Route as ExplorePublicKnowledgeInvestmentRoundsRouteImport } from './ro
 import { Route as ExplorePublicKnowledgeDappsRouteImport } from './routes/explore-public-knowledge/dapps'
 import { Route as ExplorePublicKnowledgeAssetsRouteImport } from './routes/explore-public-knowledge/assets'
 
+const ViewPublishedRoute = ViewPublishedRouteImport.update({
+  id: '/view-published',
+  path: '/view-published',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PublishKnowledgeRoute = PublishKnowledgeRouteImport.update({
+  id: '/publish-knowledge',
+  path: '/publish-knowledge',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -87,6 +99,8 @@ export interface FileRoutesByFullPath {
   '/authenticate-success': typeof AuthenticateSuccessRoute
   '/explore-public-knowledge': typeof ExplorePublicKnowledgeRouteWithChildren
   '/login': typeof LoginRoute
+  '/publish-knowledge': typeof PublishKnowledgeRoute
+  '/view-published': typeof ViewPublishedRoute
   '/explore-public-knowledge/assets': typeof ExplorePublicKnowledgeAssetsRoute
   '/explore-public-knowledge/dapps': typeof ExplorePublicKnowledgeDappsRoute
   '/explore-public-knowledge/investment-rounds': typeof ExplorePublicKnowledgeInvestmentRoundsRoute
@@ -99,6 +113,8 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/authenticate-success': typeof AuthenticateSuccessRoute
   '/login': typeof LoginRoute
+  '/publish-knowledge': typeof PublishKnowledgeRoute
+  '/view-published': typeof ViewPublishedRoute
   '/explore-public-knowledge/assets': typeof ExplorePublicKnowledgeAssetsRoute
   '/explore-public-knowledge/dapps': typeof ExplorePublicKnowledgeDappsRoute
   '/explore-public-knowledge/investment-rounds': typeof ExplorePublicKnowledgeInvestmentRoundsRoute
@@ -113,6 +129,8 @@ export interface FileRoutesById {
   '/authenticate-success': typeof AuthenticateSuccessRoute
   '/explore-public-knowledge': typeof ExplorePublicKnowledgeRouteWithChildren
   '/login': typeof LoginRoute
+  '/publish-knowledge': typeof PublishKnowledgeRoute
+  '/view-published': typeof ViewPublishedRoute
   '/explore-public-knowledge/assets': typeof ExplorePublicKnowledgeAssetsRoute
   '/explore-public-knowledge/dapps': typeof ExplorePublicKnowledgeDappsRoute
   '/explore-public-knowledge/investment-rounds': typeof ExplorePublicKnowledgeInvestmentRoundsRoute
@@ -128,6 +146,8 @@ export interface FileRouteTypes {
     | '/authenticate-success'
     | '/explore-public-knowledge'
     | '/login'
+    | '/publish-knowledge'
+    | '/view-published'
     | '/explore-public-knowledge/assets'
     | '/explore-public-knowledge/dapps'
     | '/explore-public-knowledge/investment-rounds'
@@ -140,6 +160,8 @@ export interface FileRouteTypes {
     | '/'
     | '/authenticate-success'
     | '/login'
+    | '/publish-knowledge'
+    | '/view-published'
     | '/explore-public-knowledge/assets'
     | '/explore-public-knowledge/dapps'
     | '/explore-public-knowledge/investment-rounds'
@@ -153,6 +175,8 @@ export interface FileRouteTypes {
     | '/authenticate-success'
     | '/explore-public-knowledge'
     | '/login'
+    | '/publish-knowledge'
+    | '/view-published'
     | '/explore-public-knowledge/assets'
     | '/explore-public-knowledge/dapps'
     | '/explore-public-knowledge/investment-rounds'
@@ -167,12 +191,28 @@ export interface RootRouteChildren {
   AuthenticateSuccessRoute: typeof AuthenticateSuccessRoute
   ExplorePublicKnowledgeRoute: typeof ExplorePublicKnowledgeRouteWithChildren
   LoginRoute: typeof LoginRoute
+  PublishKnowledgeRoute: typeof PublishKnowledgeRoute
+  ViewPublishedRoute: typeof ViewPublishedRoute
   PrivateSpaceSpaceIdRoute: typeof PrivateSpaceSpaceIdRoute
   PublicSpaceSpaceIdRoute: typeof PublicSpaceSpaceIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/view-published': {
+      id: '/view-published'
+      path: '/view-published'
+      fullPath: '/view-published'
+      preLoaderRoute: typeof ViewPublishedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/publish-knowledge': {
+      id: '/publish-knowledge'
+      path: '/publish-knowledge'
+      fullPath: '/publish-knowledge'
+      preLoaderRoute: typeof PublishKnowledgeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -281,6 +321,8 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticateSuccessRoute: AuthenticateSuccessRoute,
   ExplorePublicKnowledgeRoute: ExplorePublicKnowledgeRouteWithChildren,
   LoginRoute: LoginRoute,
+  PublishKnowledgeRoute: PublishKnowledgeRoute,
+  ViewPublishedRoute: ViewPublishedRoute,
   PrivateSpaceSpaceIdRoute: PrivateSpaceSpaceIdRoute,
   PublicSpaceSpaceIdRoute: PublicSpaceSpaceIdRoute,
 }

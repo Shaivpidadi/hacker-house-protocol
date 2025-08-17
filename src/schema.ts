@@ -111,3 +111,35 @@ export class EscrowContract extends Entity.Class<EscrowContract>('EscrowContract
   dateReleased: Type.String
 }) {}
 
+// entities for explore-public-knowledge routes (these are for exploring existing public data)
+export class Project extends Entity.Class<Project>('Project')({
+  name: Type.String,
+  description: Type.String,
+  avatar: Type.Relation(Image),
+  x: Type.String
+}) {}
+
+export class Asset extends Entity.Class<Asset>('Asset')({
+  name: Type.String,
+  description: Type.String,
+  symbol: Type.String,
+  blockchainAddress: Type.String,
+  avatar: Type.Relation(Image)
+}) {}
+
+export class Dapp extends Entity.Class<Dapp>('Dapp')({
+  name: Type.String,
+  description: Type.String,
+  x: Type.String,
+  github: Type.String,
+  avatar: Type.Relation(Image)
+}) {}
+
+export class InvestmentRound extends Entity.Class<InvestmentRound>('InvestmentRound')({
+  name: Type.String,
+  raisedAmount: Type.String,
+  fundingStages: Type.Relation(Project),
+  investors: Type.Relation(Project),
+  raisedBy: Type.Relation(Project)
+}) {}
+

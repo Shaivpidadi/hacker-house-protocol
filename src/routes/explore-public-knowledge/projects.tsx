@@ -15,7 +15,7 @@ function ExplorePublicKnowledgeProjects() {
     mode: 'public',
     space: 'b2565802-3118-47be-91f2-e59170735bac',
     first: 100,
-    include: { avatar: {} },
+            include: { avatar: {} },
     filter: {
       name: {
         // contains is case sensitive

@@ -12,7 +12,7 @@ function Dapps() {
     mode: 'public',
     space: 'b2565802-3118-47be-91f2-e59170735bac',
     first: 100,
-    include: { avatar: {} },
+            include: { avatar: {} },
   });
 
   return (

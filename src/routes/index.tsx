@@ -30,13 +30,13 @@ function Index() {
         <p className="text-lg text-muted-foreground">Your web3 app template powered by Hypergraph</p>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
         {/* Section 1: Explore existing public knowledge */}
         <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg border border-gray-200 dark:border-gray-700">
           <div className="text-center">
-            <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center mx-auto mb-4">
+            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mx-auto mb-4">
               <svg
-                className="w-6 h-6 text-gray-400 dark:text-gray-300"
+                className="w-6 h-6 text-blue-600 dark:text-blue-300"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -49,24 +49,84 @@ function Index() {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold mb-3">Explore Public Knowledge</h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-4">
+            <h3 className="text-lg font-semibold mb-3">Explore Public Knowledge</h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
               Discover and explore the vast network of knowledge already available in the public Knowledge Graph.
             </p>
             <Link to="/explore-public-knowledge/projects">
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full text-sm">
                 Start Exploring
               </Button>
             </Link>
           </div>
         </div>
 
-        {/* Section 2: Sign in with Geo Connect */}
+        {/* Section 2: Publish to Knowledge Graph */}
         <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg border border-gray-200 dark:border-gray-700">
           <div className="text-center">
-            <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center mx-auto mb-4">
+            <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mx-auto mb-4">
               <svg
-                className="w-6 h-6 text-gray-400 dark:text-gray-300"
+                className="w-6 h-6 text-green-600 dark:text-green-300"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold mb-3">Publish Knowledge</h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
+              Add properties and hacker profiles to your public knowledge graph. Authentication required.
+            </p>
+            <Link to="/publish-knowledge">
+              <Button className="w-full bg-green-600 hover:bg-green-700 text-sm">
+                Publish Data
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        {/* Section 3: View Published Data */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+          <div className="text-center">
+            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <svg
+                className="w-6 h-6 text-purple-600 dark:text-purple-300"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold mb-3">View Published Data</h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
+              Browse and search through the data you've published to your public knowledge graph.
+            </p>
+            <Link to="/view-published">
+              <Button variant="outline" className="w-full text-sm">
+                View Data
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        {/* Section 4: Authentication */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+          <div className="text-center">
+            <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <svg
+                className="w-6 h-6 text-orange-600 dark:text-orange-300"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -79,49 +139,13 @@ function Index() {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold mb-3">Manage Your Data</h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-4">
-              Sign in with Geo Connect to manage your private data and publish it to the public Knowledge Graph.
+            <h3 className="text-lg font-semibold mb-3">Authentication</h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
+              Sign in with Geo Connect to manage your data and publish to the public Knowledge Graph.
             </p>
-            <Button onClick={handleSignIn} className="w-full bg-primary hover:bg-primary/90">
+            <Button onClick={handleSignIn} className="w-full bg-orange-600 hover:bg-orange-700 text-sm">
               Sign in with Geo Connect
             </Button>
-          </div>
-        </div>
-
-        {/* Section 3: Explore the docs */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-lg border border-gray-200 dark:border-gray-700">
-          <div className="text-center">
-            <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center mx-auto mb-4">
-              <svg
-                className="w-6 h-6 text-gray-400 dark:text-gray-300"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold mb-3">Explore the Docs</h3>
-            <p className="text-gray-600 dark:text-gray-300 mb-4">
-              Learn how to build with Hypergraph and discover all the features available in our comprehensive
-              documentation.
-            </p>
-            <a
-              href="https://docs.hypergraph.thegraph.com/docs/quickstart"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block w-full"
-            >
-              <Button variant="outline" className="w-full">
-                Read Documentation
-              </Button>
-            </a>
           </div>
         </div>
       </div>

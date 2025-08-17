@@ -153,4 +153,52 @@ export const mapping: Mapping = {
       dateReleased: Id("023923a8-07ef-4608-b8aa-d9a03222fb34")
     },
   },
+  // entities for explore-public-knowledge routes (these are for exploring existing public data)
+  Project: {
+    typeIds: [Id("f8b642ea-8de5-4b68-acb9-13ccd845d5ce")],
+    properties: {
+      name: Id("ccc7d2d2-1a31-4771-821a-c4353b42781c"),
+      description: Id("ca2bda5a-c0e0-4b14-a3e1-3f633b421306"),
+      x: Id("cd76fed7-c351-434d-9db7-88647fd57763")
+    },
+    relations: {
+      avatar: Id("ac550a38-3b84-42d1-bb33-c1aedb065501")
+    },
+  },
+  Asset: {
+    typeIds: [Id("e8b642ea-8de5-4b68-acb9-13ccd845d5ce")],
+    properties: {
+      name: Id("ccc7d2d2-1a31-4771-821a-c4353b42781c"),
+      description: Id("ca2bda5a-c0e0-4b14-a3e1-3f633b421306"),
+      symbol: Id("5ed0778a-b559-4a27-ab9e-a6fc400f94c9"),
+      blockchainAddress: Id("54a01308-19a1-49c2-a001-a7e7e7b1f038")
+    },
+    relations: {
+      avatar: Id("ac550a38-3b84-42d1-bb33-c1aedb065501")
+    },
+  },
+  Dapp: {
+    typeIds: [Id("d8b642ea-8de5-4b68-acb9-13ccd845d5ce")],
+    properties: {
+      name: Id("ccc7d2d2-1a31-4771-821a-c4353b42781c"),
+      description: Id("ca2bda5a-c0e0-4b14-a3e1-3f633b421306"),
+      x: Id("cd76fed7-c351-434d-9db7-88647fd57763"),
+      github: Id("54a01308-19a1-49c2-a001-a7e7e7b1f038")
+    },
+    relations: {
+      avatar: Id("ac550a38-3b84-42d1-bb33-c1aedb065501")
+    },
+  },
+  InvestmentRound: {
+    typeIds: [Id("c8b642ea-8de5-4b68-acb9-13ccd845d5ce")],
+    properties: {
+      name: Id("ccc7d2d2-1a31-4771-821a-c4353b42781c"),
+      raisedAmount: Id("fe3d6f33-8e5d-4e7a-8ad7-c4fcf232d3dc")
+    },
+    relations: {
+      fundingStages: Id("9c8f0a3f-2e86-452e-a17e-c76a47f21167"),
+      investors: Id("c5cf570a-74dc-45ea-8b51-e6d379c4cd0b"),
+      raisedBy: Id("a9fd56c8-9c7c-4790-9479-1c3aba1c39b2")
+    },
+  },
 }
