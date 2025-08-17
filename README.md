@@ -93,5 +93,10 @@ This isn't just another DeFi protocol. We're solving real problems that affect t
 
 *Built with ❤️ for the hackathon community*
 Twitter: x.com/hackerhousep
+Website: https://hackerhouse.app/
+Presentation Deck: https://docs.google.com/presentation/d/1086j3TyvSXLmkPZK3aXF58eYmfiQqNOTiOXxJY7VTq8/
+Figma: https://www.figma.com/design/A8k8TI5T4IvaJHZ41b05aY/NYC-Hackathon---FINAL?node-id=0-1&p=f&t=RgqqTm0ksDj1oXCn-0
 
+---
 Important Note: On the submission dashboard we got the following message: "Too many lines changed in a single commit", but this is because we merge 3 different repo (app, subgraph and Contracts) and turned this into one mono-repo for submission.
+
