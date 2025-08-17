@@ -195,6 +195,19 @@ export function BookingModal({
       }
     } catch (err) {
       console.error("Failed to create reservation:", err);
+
+      // Enhanced error logging for debugging
+      console.log("Reservation arguments that failed:", {
+        listingId: args.listingId,
+        startDate: args.startDate,
+        endDate: args.endDate,
+        nights: args.nights,
+        payers: args.payers,
+        bps: args.bps,
+        totalCost: totalCost,
+        nightlyRate: nightlyRate,
+      });
+
       // Show user-friendly error
       toast({
         title: "Reservation Failed",
@@ -385,6 +398,19 @@ export function BookingModal({
             >
               Continue
             </Button>
+
+            {/* Troubleshooting Info */}
+            <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-xs text-yellow-800 font-medium mb-2">
+                💡 Troubleshooting Tips:
+              </p>
+              <ul className="text-xs text-yellow-700 space-y-1">
+                <li>• Ensure your wallet has enough funds for gas fees</li>
+                <li>• Check that dates are valid (start before end)</li>
+                <li>• Verify you're connected to the correct network</li>
+                <li>• Try refreshing the page if issues persist</li>
+              </ul>
+            </div>
           </div>
         )}
 

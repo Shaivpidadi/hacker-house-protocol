@@ -285,9 +285,39 @@ export function useHHPContract() {
                     console.warn("Development mode: Skipping EIP-712 signature verification");
                 }
 
+                // Validate arguments before sending transaction
+                if (!createResArgs.listingId || createResArgs.listingId <= 0) {
+                    throw new Error("Invalid listing ID");
+                }
+                if (!createResArgs.startDate || !createResArgs.endDate) {
+                    throw new Error("Invalid dates");
+                }
+                if (createResArgs.startDate >= createResArgs.endDate) {
+                    throw new Error("Start date must be before end date");
+                }
+                if (!createResArgs.payers || createResArgs.payers.length === 0) {
+                    throw new Error("No payers specified");
+                }
+                if (!createResArgs.bps || createResArgs.bps.length === 0) {
+                    throw new Error("No payment splits specified");
+                }
+
                 console.log("Create reservation arguments:", createResArgs);
                 console.log("Eligibility proof:", eligibilityProof);
                 console.log("Mode:", isDevelopmentMode ? "Development" : "Production");
+
+                // Estimate gas first to catch potential issues early
+                try {
+                    const gasEstimate = await contract.createReservation.estimateGas(createResArgs, eligibilityProof);
+                    console.log("Gas estimate:", gasEstimate.toString());
+
+                    // Add 20% buffer for gas (BigInt arithmetic)
+                    const gasLimit = (gasEstimate * BigInt(120)) / BigInt(100);
+                    console.log("Gas limit with buffer:", gasLimit.toString());
+                } catch (gasError) {
+                    console.warn("Gas estimation failed:", gasError);
+                    // Continue with transaction, but log the warning
+                }
 
                 const tx = await contract.createReservation(createResArgs, eligibilityProof);
                 const receipt = await tx.wait();
@@ -317,22 +347,58 @@ export function useHHPContract() {
 
                 return reservationId;
             } catch (err: any) {
-                // Enhanced error decoding
+                console.error("Raw error object:", err);
+
+                // Enhanced error decoding with better fallbacks
                 const raw = err?.data ?? err?.error?.data ?? err?.info?.error?.data ?? err?.transaction?.data;
                 const decoded = typeof raw === "string" ? decodeRevertString(raw) : null;
                 const errCode = typeof raw === "string" ? raw.slice(0, 10) : "";
 
-                const errorMap: Record<string, string> = {
-                    "0xf645eedf": "Invalid eligibility proof or signature",
-                    "0xfce698f7": "Invalid date format or business logic error",
-                    "0x08c379a0": decoded || "Contract Error(string)",
-                };
+                // Check for specific error types
+                let friendly = "Transaction failed";
 
-                const friendly = decoded || errorMap[errCode] || err?.reason || err?.shortMessage || err?.message || "Transaction reverted";
+                if (err?.code === -32603) {
+                    friendly = "Internal JSON-RPC error - this usually means the transaction was rejected by the network";
+                } else if (err?.code === -32000) {
+                    friendly = "Insufficient funds or gas for transaction";
+                } else if (err?.code === -32602) {
+                    friendly = "Invalid parameters sent to the contract";
+                } else if (err?.message?.includes("insufficient funds")) {
+                    friendly = "Insufficient funds to complete the transaction";
+                } else if (err?.message?.includes("gas")) {
+                    friendly = "Gas estimation failed - check your wallet has enough funds";
+                } else if (decoded) {
+                    friendly = decoded;
+                } else if (errCode) {
+                    const errorMap: Record<string, string> = {
+                        "0xf645eedf": "Invalid eligibility proof or signature",
+                        "0xfce698f7": "Invalid date format or business logic error",
+                        "0x08c379a0": "Contract Error(string)",
+                    };
+                    friendly = errorMap[errCode] || "Contract validation failed";
+                } else if (err?.reason) {
+                    friendly = err.reason;
+                } else if (err?.shortMessage) {
+                    friendly = err.shortMessage;
+                } else if (err?.message) {
+                    friendly = err.message;
+                }
 
-                console.error("CreateReservation error", { msg: friendly, err, raw });
+                console.error("CreateReservation error", {
+                    msg: friendly,
+                    err,
+                    raw,
+                    code: err?.code,
+                    message: err?.message,
+                    reason: err?.reason
+                });
+
                 setError(friendly);
-                toast({ title: "Error", description: friendly, variant: "destructive" });
+                toast({
+                    title: "Reservation Failed",
+                    description: friendly,
+                    variant: "destructive"
+                });
                 return null;
             } finally {
                 setIsLoading(false);

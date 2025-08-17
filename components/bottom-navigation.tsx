@@ -32,7 +32,7 @@ export function BottomNavigation({
     {
       name: "Explore",
       icon: Map,
-      href: "/explore",
+      href: "/",
       active: pathname === "/explore",
     },
     {
@@ -40,12 +40,6 @@ export function BottomNavigation({
       icon: Heart,
       href: "/favorites",
       active: pathname === "/favorites",
-    },
-    {
-      name: "HHP",
-      icon: Smartphone,
-      href: "/hhp",
-      active: pathname === "/hhp",
     },
     {
       name: "Profile",
