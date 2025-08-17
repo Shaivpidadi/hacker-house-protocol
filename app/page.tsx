@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useDashboardSummary } from "@/hooks/use-hhp-data";
 import { useEnhancedListingsWithIPFS } from "@/hooks/use-enhanced-listings";
 import { formatUnits } from "ethers";
@@ -29,6 +30,7 @@ function getFallbackIcon(icon: any) {
 }
 
 export default function HomePage() {
+  const [activeTab, setActiveTab] = useState("Apartments");
   const { user, authenticated, ready } = usePrivy();
 
   // Fetch HHP dashboard data
@@ -47,23 +49,6 @@ export default function HomePage() {
   } = useEnhancedListingsWithIPFS({
     first: 6,
   });
-
-  const hackerHouses = [
-    {
-      id: 1,
-      title: "TechBros BA",
-      location: "Buenos Aires",
-      description: "Just cool people getting together to make cool stuff.",
-      attendees: 6,
-    },
-    {
-      id: 2,
-      title: "TechBros BA",
-      location: "Buenos Aires",
-      description: "Just cool people getting together to make cool stuff.",
-      attendees: 8,
-    },
-  ];
 
   // Transform enhanced HHP listings to property format
   const properties =
@@ -146,19 +131,61 @@ export default function HomePage() {
 
           {/* Tab Navigation */}
           <div className="flex items-center justify-center gap-8 mb-6">
-            <div className="flex flex-col items-center">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-2 shadow-sm">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded shadow-sm"></div>
+            <div
+              className="flex flex-col items-center cursor-pointer"
+              onClick={() => setActiveTab("Apartments")}
+            >
+              <div
+                className={`w-12 h-12 rounded-lg flex items-center justify-center mb-2 shadow-sm transition-all duration-300 ${
+                  activeTab === "Apartments"
+                    ? "bg-blue-500 shadow-md"
+                    : "bg-blue-100"
+                }`}
+              >
+                <div
+                  className={`w-8 h-8 rounded shadow-sm ${
+                    activeTab === "Apartments"
+                      ? "bg-white"
+                      : "bg-gradient-to-br from-blue-500 to-blue-600"
+                  }`}
+                ></div>
               </div>
-              <span className="text-sm font-medium text-black border-b-2 border-blue-600 pb-1">
+              <span
+                className={`text-sm font-medium transition-colors duration-300 ${
+                  activeTab === "Apartments"
+                    ? "text-black border-b-2 border-blue-600 pb-1"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
                 Apartments
               </span>
             </div>
-            <div className="flex flex-col items-center">
-              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-2 shadow-sm">
-                <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded shadow-sm"></div>
+            <div
+              className="flex flex-col items-center cursor-pointer"
+              onClick={() => setActiveTab("Events")}
+            >
+              <div
+                className={`w-12 h-12 rounded-lg flex items-center justify-center mb-2 shadow-sm transition-all duration-300 ${
+                  activeTab === "Events"
+                    ? "bg-orange-500 shadow-md"
+                    : "bg-orange-100"
+                }`}
+              >
+                <div
+                  className={`w-8 h-8 rounded shadow-sm ${
+                    activeTab === "Events"
+                      ? "bg-white"
+                      : "bg-gradient-to-br from-orange-500 to-orange-600"
+                  }`}
+                ></div>
               </div>
-              <span className="text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors cursor-pointer">
+              <span
+                className={`text-sm font-medium transition-colors duration-300 ${
+                  activeTab === "Events"
+                    ? "text-black border-b-2 border-orange-600 pb-1"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+              >
                 Events
               </span>
             </div>
@@ -222,171 +249,188 @@ export default function HomePage() {
 
       {/* Main Content */}
       <div className="max-w-md mx-auto px-4 pb-24">
-        <h1 className="text-2xl font-bold mb-6 bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-          Explore Hackathon Events!
-        </h1>
+        {/* Events Tab Content */}
+        {activeTab === "Events" && (
+          <>
+            <h1 className="text-2xl font-bold mb-6 bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+              Explore Hackathon Events!
+            </h1>
 
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold">Hacker Houses</h2>
-          <Button
-            variant="ghost"
-            className="text-blue-500 font-medium hover:text-blue-600 transition-colors"
-          >
-            View All
-          </Button>
-        </div>
-
-        <div className="space-y-4 mb-8">
-          {hackerHouses?.map((house: any) => (
-            <Card
-              key={house?.id}
-              className="rounded-2xl shadow-sm bg-white/80 backdrop-blur-sm hover:shadow-md transition-all duration-200 hover:scale-[1.02]"
-            >
-              <CardContent className="p-4">
-                <div className="flex gap-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-500 rounded-xl flex-shrink-0 shadow-sm"></div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-base mb-1">
-                      {house?.title || "Untitled House"}
-                    </h3>
-                    <div className="flex items-center gap-1 mb-2">
-                      <MapPin className="w-3 h-3 text-gray-400" />
-                      <span className="text-sm text-gray-500">
-                        {house?.location || "Location TBD"}
-                      </span>
-                      <Users className="w-3 h-3 text-gray-400 ml-2" />
-                      <span className="text-sm text-gray-500">
-                        {house?.attendees || 0} members
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-3">
-                      {house?.description || "No description available"}
-                    </p>
-                    <Button className="bg-white border border-gray-300 text-black hover:bg-gray-50 rounded-full px-6 h-8 text-sm transition-all duration-200 hover:scale-105">
-                      Join
-                    </Button>
+            {/* Add your hackathon events content here */}
+            <div className="space-y-4 mb-8">
+              <Card className="rounded-2xl shadow-sm bg-white/80 backdrop-blur-sm hover:shadow-md transition-all duration-200 hover:scale-[1.02]">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <span className="text-sm font-medium text-gray-600">
+                      Hackathon
+                    </span>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* HHP Property Cards */}
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold">HHP Listings</h2>
-          <Button
-            variant="ghost"
-            className="text-blue-500 font-medium hover:text-blue-600 transition-colors"
-            asChild
-          >
-            <Link href="/explore">View All</Link>
-          </Button>
-        </div>
-        <div className="space-y-4 mb-8">
-          {/* Loading State */}
-          {listingsLoading && (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Loading HHP listings...</p>
-            </div>
-          )}
-
-          {/* Error State */}
-          {listingsError && (
-            <div className="text-center py-12">
-              <p className="text-destructive mb-4">
-                Error loading HHP listings
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Check your subgraph connection
-              </p>
-            </div>
-          )}
-
-          {/* No Listings */}
-          {!listingsLoading && !listingsError && properties.length === 0 && (
-            <div className="text-center py-12">
-              <Home className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">No HHP listings found</p>
-              <p className="text-sm text-muted-foreground mt-2">
-                Check back later or visit the explore page
-              </p>
-            </div>
-          )}
-
-          {/* Listings */}
-          {!listingsLoading &&
-            !listingsError &&
-            properties.length > 0 &&
-            properties.map((property: any) => (
-              <Link
-                key={property.id}
-                href={`/property/${property?.hhpData?.listingId}`}
-              >
-                <Card className="relative overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] bg-white">
-                  <div className="relative h-64 bg-gradient-to-br from-gray-800 to-gray-600">
-                    <div className="absolute inset-0 bg-black/20"></div>
-                    <div className="absolute top-4 right-4 flex gap-2">
-                      <Button
-                        size="icon"
-                        variant="secondary"
-                        className="w-10 h-10 rounded-full bg-white/90 hover:bg-white transition-all duration-200 hover:scale-110"
-                      >
-                        <Heart className="w-5 h-5 text-green-500" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="secondary"
-                        className="w-10 h-10 rounded-full bg-white/90 hover:bg-white transition-all duration-200 hover:scale-110"
-                      >
-                        <Info className="w-5 h-5" />
-                      </Button>
-                    </div>
-                    <div className="absolute bottom-4 left-4 right-4 text-white">
-                      <h3 className="text-xl font-semibold mb-1">
-                        {property.title}
-                      </h3>
-                      <div className="flex items-center gap-1 mb-2">
-                        <MapPin className="w-4 h-4" />
-                        <span className="text-sm">{property.location}</span>
-                      </div>
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-lg font-semibold">
-                          ${property.price}/Day
+                  <h3 className="text-lg font-bold mb-2">
+                    ETH Global Buenos Aires
+                  </h3>
+                  <div className="flex items-center gap-1 mb-2">
+                    <MapPin className="w-4 h-4 text-gray-400" />
+                    <span className="text-sm text-gray-500">
+                      Buenos Aires, Argentina
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-3">
+                    Build the future of Web3 with the best developers worldwide.
+                  </p>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-1">
+                        <Users className="w-4 h-4 text-gray-400" />
+                        <span className="text-sm text-gray-500">
+                          250 attendees
                         </span>
-                        <div className="flex items-center gap-1">
-                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                          <span className="text-sm">{property.rating}</span>
+                      </div>
+                      <span className="text-sm font-semibold text-gray-700">
+                        Aug 15-17, 2025
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xs text-gray-500">Prize Pool</div>
+                      <div className="font-bold text-green-600">50 ETH</div>
+                    </div>
+                  </div>
+                  <Button className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white hover:from-blue-600 hover:to-purple-700 rounded-lg">
+                    Join Event
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </>
+        )}
+
+        {/* Apartments Tab Content */}
+        {activeTab === "Apartments" && (
+          <>
+            {/* HHP Property Cards */}
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">HHP Listings</h2>
+              <Button
+                variant="ghost"
+                className="text-blue-500 font-medium hover:text-blue-600 transition-colors"
+                asChild
+              >
+                <Link href="/explore">View All</Link>
+              </Button>
+            </div>
+            <div className="space-y-4 mb-8">
+              {/* Loading State */}
+              {listingsLoading && (
+                <div className="text-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                  <p className="text-muted-foreground">
+                    Loading HHP listings...
+                  </p>
+                </div>
+              )}
+
+              {/* Error State */}
+              {listingsError && (
+                <div className="text-center py-12">
+                  <p className="text-destructive mb-4">
+                    Error loading HHP listings
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Check your subgraph connection
+                  </p>
+                </div>
+              )}
+
+              {/* No Listings */}
+              {!listingsLoading &&
+                !listingsError &&
+                properties.length === 0 && (
+                  <div className="text-center py-12">
+                    <Home className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground">
+                      No HHP listings found
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Check back later or visit the explore page
+                    </p>
+                  </div>
+                )}
+
+              {/* Listings */}
+              {!listingsLoading &&
+                !listingsError &&
+                properties.length > 0 &&
+                properties.map((property: any) => (
+                  <Link
+                    key={property.id}
+                    href={`/property/${property?.hhpData?.listingId}`}
+                  >
+                    <Card className="relative overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] bg-white">
+                      <div className="relative h-64 bg-gradient-to-br from-gray-800 to-gray-600">
+                        <div className="absolute inset-0 bg-black/20"></div>
+                        <div className="absolute top-4 right-4 flex gap-2">
+                          <Button
+                            size="icon"
+                            variant="secondary"
+                            className="w-10 h-10 rounded-full bg-white/90 hover:bg-white transition-all duration-200 hover:scale-110"
+                          >
+                            <Heart className="w-5 h-5 text-green-500" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="secondary"
+                            className="w-10 h-10 rounded-full bg-white/90 hover:bg-white transition-all duration-200 hover:scale-110"
+                          >
+                            <Info className="w-5 h-5" />
+                          </Button>
+                        </div>
+                        <div className="absolute bottom-4 left-4 right-4 text-white">
+                          <h3 className="text-xl font-semibold mb-1">
+                            {property.title}
+                          </h3>
+                          <div className="flex items-center gap-1 mb-2">
+                            <MapPin className="w-4 h-4" />
+                            <span className="text-sm">{property.location}</span>
+                          </div>
+                          <div className="flex items-center gap-2 mb-3">
+                            <span className="text-lg font-semibold">
+                              ${property.price}/Day
+                            </span>
+                            <div className="flex items-center gap-1">
+                              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                              <span className="text-sm">{property.rating}</span>
+                            </div>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {property.amenities?.map(
+                              (amenity: any, index: number) => {
+                                const IconComponent = getFallbackIcon(
+                                  amenity?.icon
+                                );
+                                return (
+                                  <div
+                                    key={index}
+                                    className="flex items-center gap-1 px-3 py-1 bg-black/30 rounded-full text-xs backdrop-blur-sm"
+                                  >
+                                    <IconComponent className="w-3 h-3" />
+                                    <span>
+                                      {amenity?.name || `Amenity ${index + 1}`}
+                                    </span>
+                                  </div>
+                                );
+                              }
+                            )}
+                          </div>
                         </div>
                       </div>
-                      <div className="flex flex-wrap gap-2">
-                        {property.amenities?.map(
-                          (amenity: any, index: number) => {
-                            const IconComponent = getFallbackIcon(
-                              amenity?.icon
-                            );
-                            return (
-                              <div
-                                key={index}
-                                className="flex items-center gap-1 px-3 py-1 bg-black/30 rounded-full text-xs backdrop-blur-sm"
-                              >
-                                <IconComponent className="w-3 h-3" />
-                                <span>
-                                  {amenity?.name || `Amenity ${index + 1}`}
-                                </span>
-                              </div>
-                            );
-                          }
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              </Link>
-            ))}
-        </div>
+                    </Card>
+                  </Link>
+                ))}
+            </div>
+          </>
+        )}
 
+        {/* Find Hacker Homies Section */}
         <h2 className="text-lg font-semibold mb-4">Find Hacker Homies</h2>
 
         <div className="grid grid-cols-2 gap-3">
