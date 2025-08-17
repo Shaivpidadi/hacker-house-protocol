@@ -1,5 +1,5 @@
 import { Booking, Property, Hacker, Landlord, Image } from '@/schema';
-import { useCreateEntity } from '@graphprotocol/hypergraph-react';
+import { useCreateEntity, useSpaces } from '@graphprotocol/hypergraph-react';
 import { useState } from 'react';
 
 interface BookingFormData {
@@ -56,11 +56,15 @@ interface BookingFormData {
 }
 
 export function PublishBooking() {
+  const { data: spaces } = useSpaces({ mode: 'public' });
   const createBooking = useCreateEntity(Booking);
   const createProperty = useCreateEntity(Property);
   const createHacker = useCreateEntity(Hacker);
   const createLandlord = useCreateEntity(Landlord);
   const createImage = useCreateEntity(Image);
+  
+  // get the first available space (you might want to let users choose)
+  const publicSpace = spaces?.[0];
   
   const [isPublishing, setIsPublishing] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -118,12 +122,28 @@ export function PublishBooking() {
     eventImageUrl: ''
   });
 
+  // show loading while spaces are being fetched
+  if (!spaces) {
+    return (
+      <div className="max-w-2xl mx-auto p-6">
+        <div className="flex justify-center items-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+        </div>
+      </div>
+    );
+  }
+
   const handleInputChange = (field: keyof BookingFormData, value: string | number | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!publicSpace) {
+      setMessage({ type: 'error', text: 'No public space available for publishing' });
+      return;
+    }
     
     setIsPublishing(true);
     setMessage(null);

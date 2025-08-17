@@ -18,7 +18,7 @@ export function PublishHacker() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // get the first available space (you might want to let users choose)
-  const publicSpace = spaces?.find((space) => space.name === 'Public Space');
+  const publicSpace = spaces?.[0];
 
   const [formData, setFormData] = useState<PublishHackerFormData>({
     name: '',

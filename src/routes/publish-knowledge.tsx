@@ -3,6 +3,7 @@ import { PublishProperty } from '@/components/publish-property';
 import { PublishHacker } from '@/components/publish-hacker';
 import { PublishBooking } from '@/components/publish-booking';
 import { BulkUpload } from '@/components/bulk-upload';
+import { PublishToPublic } from '@/components/publish-to-public';
 import { useUserInfo } from '@/lib/auth';
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
@@ -13,7 +14,7 @@ export const Route = createFileRoute('/publish-knowledge')({
 
 function PublishKnowledgePage() {
   const user = useUserInfo();
-  const [activeTab, setActiveTab] = useState<'property' | 'hacker' | 'booking' | 'bulk'>('booking');
+  const [activeTab, setActiveTab] = useState<'property' | 'hacker' | 'booking' | 'bulk' | 'publish'>('booking');
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -116,6 +117,22 @@ function PublishKnowledgePage() {
                     Bulk Upload
                   </div>
                 </button>
+                <button
+                  onClick={() => setActiveTab('publish')}
+                  className={`px-6 py-4 text-sm font-medium transition-colors ${
+                    activeTab === 'publish'
+                      ? 'bg-indigo-50 text-indigo-700 border-b-2 border-indigo-700'
+                      : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    Publish to Public
+                  </div>
+                </button>
+
               </nav>
             </div>
 
@@ -124,6 +141,7 @@ function PublishKnowledgePage() {
               {activeTab === 'hacker' && <PublishHacker />}
               {activeTab === 'booking' && <PublishBooking />}
               {activeTab === 'bulk' && <BulkUpload />}
+              {activeTab === 'publish' && <PublishToPublic />}
             </div>
           </div>
 

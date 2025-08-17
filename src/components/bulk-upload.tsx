@@ -1,5 +1,5 @@
 import { Booking, Property, Hacker, Landlord, Image } from '@/schema';
-import { useCreateEntity } from '@graphprotocol/hypergraph-react';
+import { useCreateEntity, useSpaces, HypergraphSpaceProvider } from '@graphprotocol/hypergraph-react';
 import { useState } from 'react';
 
 interface BookingData {
@@ -48,6 +48,41 @@ interface BookingData {
 }
 
 export function BulkUpload() {
+  const { data: spaces } = useSpaces({ mode: 'private' });
+  
+  if (!spaces || spaces.length === 0) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-800">No private space found. Please create a private space first.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const privateSpace = spaces?.[0]; // Use the first available private space
+
+  if (!privateSpace) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-800">No private space found. Please create a private space first.</p>
+        </div>
+      </div>
+    );
+  }
+
+  console.log('Available private spaces:', spaces);
+  console.log('Selected private space:', privateSpace);
+
+  return (
+    <HypergraphSpaceProvider space={privateSpace.id}>
+      <BulkUploadContent />
+    </HypergraphSpaceProvider>
+  );
+}
+
+function BulkUploadContent() {
   const createBooking = useCreateEntity(Booking);
   const createProperty = useCreateEntity(Property);
   const createHacker = useCreateEntity(Hacker);
@@ -57,6 +92,9 @@ export function BulkUpload() {
   const [isUploading, setIsUploading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [uploadProgress, setUploadProgress] = useState<{ current: number; total: number } | null>(null);
+
+  // space is ready when using private space
+  const isReady = true;
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -86,6 +124,7 @@ export function BulkUpload() {
       for (let i = 0; i < bookings.length; i++) {
         try {
           const bookingData = bookings[i];
+          console.log(`Processing booking ${i + 1}:`, bookingData);
           
           // create property image if provided
           let propertyImageEntity = null;
@@ -111,7 +150,9 @@ export function BulkUpload() {
             deposit: bookingData.propertyDeposit,
             ...(propertyImageEntity && { image: [propertyImageEntity.id] })
           };
+          console.log('Creating property with data:', propertyData);
           const property = await createProperty(propertyData);
+          console.log('Property created:', property);
 
           // create landlord image if provided
           let landlordImageEntity = null;
@@ -249,6 +290,17 @@ export function BulkUpload() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
+
+  if (!isReady) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="flex justify-center items-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+          <p className="ml-3 text-gray-600">Preparing space...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-6">

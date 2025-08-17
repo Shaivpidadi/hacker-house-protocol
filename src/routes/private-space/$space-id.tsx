@@ -51,7 +51,11 @@ function PrivateSpace() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    createProject({ name: projectName, description: projectDescription });
+    createProject({ 
+      name: projectName, 
+      description: projectDescription,
+      x: '' // required field for Project entity
+    });
     setProjectName('');
     setProjectDescription('');
   };

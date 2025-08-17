@@ -1,6 +1,8 @@
 import { ViewPublishedProperties } from '@/components/view-published-properties';
 import { ViewPublishedHackers } from '@/components/view-published-hackers';
 import { ViewPublishedBookings } from '@/components/view-published-bookings';
+import { ViewPublicData } from '@/components/view-public-data';
+import { TestPublicQuery } from '@/components/test-public-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 
@@ -9,7 +11,7 @@ export const Route = createFileRoute('/view-published')({
 });
 
 function ViewPublishedPage() {
-  const [activeTab, setActiveTab] = useState<'properties' | 'hackers' | 'bookings'>('bookings');
+  const [activeTab, setActiveTab] = useState<'properties' | 'hackers' | 'bookings' | 'public' | 'test'>('bookings');
 
   return (
     <div className="container mx-auto px-4 py-6">
@@ -72,6 +74,36 @@ function ViewPublishedPage() {
                   Bookings ({activeTab === 'bookings' ? 'Active' : ''})
                 </div>
               </button>
+              <button
+                onClick={() => setActiveTab('public')}
+                className={`px-6 py-4 text-sm font-medium transition-colors ${
+                  activeTab === 'public'
+                    ? 'bg-indigo-50 text-indigo-700 border-b-2 border-indigo-700'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  Public Data ({activeTab === 'public' ? 'Active' : ''})
+                </div>
+              </button>
+              <button
+                onClick={() => setActiveTab('test')}
+                className={`px-6 py-4 text-sm font-medium transition-colors ${
+                  activeTab === 'test'
+                    ? 'bg-green-50 text-green-700 border-b-2 border-green-700'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Test Queries ({activeTab === 'test' ? 'Active' : ''})
+                </div>
+              </button>
             </nav>
           </div>
         </div>
@@ -81,6 +113,8 @@ function ViewPublishedPage() {
           {activeTab === 'properties' && <ViewPublishedProperties />}
           {activeTab === 'hackers' && <ViewPublishedHackers />}
           {activeTab === 'bookings' && <ViewPublishedBookings />}
+          {activeTab === 'public' && <ViewPublicData />}
+          {activeTab === 'test' && <TestPublicQuery />}
         </div>
 
         {/* info section */}
