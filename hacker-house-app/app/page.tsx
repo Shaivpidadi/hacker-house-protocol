@@ -36,6 +36,27 @@ export default function HomePage() {
   const [isSwiping, setIsSwiping] = useState(false);
   const { user, authenticated, ready } = usePrivy();
 
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (ready && !authenticated) {
+      window.location.href = "/login";
+    }
+  }, [ready, authenticated]);
+
+  // Show loading while checking authentication
+  if (!ready) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  // Don't render anything if not authenticated (will redirect)
+  if (!authenticated) {
+    return null;
+  }
+
   // Fetch HHP dashboard data
   const {
     data: dashboardData,
