@@ -21,8 +21,6 @@
 
 ## Deployed (Testnets)
 
-See **DeployedAddresses.md** for the latest. Example (replace with yours):
-
 | Component                         | Chain            | Address                                      |
 | --------------------------------- | ---------------- | -------------------------------------------- |
 | HackerHouseProtocol               | Arbitrum Sepolia | `0xE633Ea91a3c78C5C29B04A6883AA970b19220cF9` |
@@ -66,7 +64,7 @@ transferRemote(ArbSepolia, recipient, amount) on the Sepolia router, paying a sm
 
 Hyperlane delivers the message; on Arbitrum Sepolia, the user receives hyPYUSD.
 
-They pay your protocol:
+They pay out protocol:
 
 approve(HHP, amount) on hyPYUSD.
 
@@ -76,22 +74,20 @@ Later, the builder withdraws from HHP (hyPYUSD goes to builder; protocol fee to 
 
 (If the builder wants funds back on another chain, they can bridge hyPYUSD back via Hyperlane, which burns on Arbitrum and mints/unlocks on the other side.)
 
-How this connects to your app pieces
+How this connects to the app pieces with others
 
 HackerHouseProtocol (Arbitrum Sepolia)
 Accepts hyPYUSD as its paymentToken. Handles listings, reservations, splits, funding, and withdraw.
 
 Hyperlane
-Provides the interchain PYUSD experience: lock (Sepolia) ↔ mint (Arb Sepolia) and back. You used:
+Provides the interchain PYUSD experience: lock (Sepolia) ↔ mint (Arb Sepolia) and back. 
 
-Warp Route (collateral ↔ synthetic)
-
-Mailbox/ISM (message security/verification)
-
-IGP (interchain gas payment)
-
+We used:
+  - Warp Route (collateral ↔ synthetic)
+  - Mailbox/ISM (message security/verification)
+  - IGP (interchain gas payment)
 PYUSD
-The currency users hold/bridge. In prod, this could be real PYUSD from Mainnet (or L2s with liquidity). In test, it’s your tPYUSD collateral on Sepolia → hyPYUSD on Arbitrum Sepolia.
+  - The currency users hold/bridge. In prod, this could be real PYUSD from Mainnet (or L2s with liquidity). In test, it’s tPYUSD collateral on Sepolia → hyPYUSD on Arbitrum Sepolia.
 
 ## Technical Overview
 
