@@ -236,7 +236,10 @@ export default function ProfilePage() {
 
         {/* Logout */}
         <Button
-          onClick={logout}
+          onClick={() => {
+            logout();
+            window.location.href = "/login";
+          }}
           variant="outline"
           className="w-full text-destructive border-destructive/20 hover:bg-destructive/10 glass-card bg-transparent"
         >

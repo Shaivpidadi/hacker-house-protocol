@@ -379,12 +379,18 @@ export function BookingModal({
                     <span>Rate per night:</span>
                     <span className="font-medium">
                       ${formattedNightlyRate.toFixed(2)}
+                      <span className="text-xs font-normal text-gray-500 ml-1">
+                        pyUSD
+                      </span>
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span>Total cost:</span>
                     <span className="font-bold text-lg text-blue-900">
                       ${totalCost.toFixed(2)}
+                      <span className="text-xs font-normal text-gray-500 ml-1">
+                        pyUSD
+                      </span>
                     </span>
                   </div>
                 </div>
@@ -516,12 +522,20 @@ export function BookingModal({
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span>Total cost:</span>
-                  <span className="font-medium">${totalCost.toFixed(2)}</span>
+                  <span className="font-medium">
+                    ${totalCost.toFixed(2)}
+                    <span className="text-xs font-normal text-gray-500 ml-1">
+                      pyUSD
+                    </span>
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span>Per person:</span>
                   <span className="font-medium text-green-700">
                     ${costPerPerson.toFixed(2)}
+                    <span className="text-xs font-normal text-gray-500 ml-1">
+                      pyUSD
+                    </span>
                   </span>
                 </div>
                 <div className="pt-2 border-t border-green-200">
@@ -529,6 +543,9 @@ export function BookingModal({
                     <span>Your share:</span>
                     <span className="text-green-900">
                       ${costPerPerson.toFixed(2)}
+                      <span className="text-xs font-normal text-gray-500 ml-1">
+                        pyUSD
+                      </span>
                     </span>
                   </div>
                 </div>

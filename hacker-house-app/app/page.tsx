@@ -262,60 +262,6 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* HHP Dashboard Section */}
-      {!dashboardLoading && !dashboardError && dashboardData && (
-        <div className="px-4 mb-6">
-          <div className="max-w-md mx-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-blue-600" />
-                HHP Protocol Stats
-              </h2>
-              <Button
-                onClick={() => dashboardRefetch()}
-                variant="ghost"
-                size="sm"
-                className="text-blue-500 hover:text-blue-600"
-              >
-                <RefreshCw className="h-4 w-4" />
-              </Button>
-            </div>
-
-            <div className="grid grid-cols-3 gap-3">
-              <Card className="text-center p-3 bg-white/80 backdrop-blur-sm">
-                <div className="text-2xl font-bold text-blue-600">
-                  {dashboardData?.listingCreatedBasics?.length || 0}
-                </div>
-                <div className="text-xs text-gray-600">Listings</div>
-              </Card>
-              <Card className="text-center p-3 bg-white/80 backdrop-blur-sm">
-                <div className="text-2xl font-bold text-green-600">
-                  {dashboardData?.reservationCreateds?.length || 0}
-                </div>
-                <div className="text-xs text-gray-600">Reservations</div>
-              </Card>
-              <Card className="text-center p-3 bg-white/80 backdrop-blur-sm">
-                <div className="text-2xl font-bold text-purple-600">
-                  {dashboardData?.reservationFundeds?.length > 0
-                    ? formatUnits(
-                        dashboardData.reservationFundeds.reduce(
-                          (sum: bigint, fund: any) =>
-                            sum + BigInt(fund?.amount || "0"),
-                          BigInt(0)
-                        ),
-                        6 // pyUSD has 6 decimals
-                      ).slice(0, 6)
-                    : "0"}
-                </div>
-                <div className="text-xs text-gray-600">
-                  Total Funded (pyUSD)
-                </div>
-              </Card>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Main Content */}
       <div className="max-w-md mx-auto px-4 pb-24">
         {/* Events Tab Content */}
@@ -513,7 +459,10 @@ export default function HomePage() {
                           Price
                         </div>
                         <div className="text-2xl font-bold text-green-600">
-                          ${properties[currentPropertyIndex]?.price || "89"}
+                          <span className="text-xs font-normal text-gray-500 mr-1">
+                            pyUSD{" "}
+                          </span>
+                          {properties[currentPropertyIndex]?.price || "89"}
                           <span className="text-sm font-normal text-gray-500 ml-1">
                             /day
                           </span>
@@ -678,6 +627,60 @@ export default function HomePage() {
           ))}
         </div>
       </div>
+
+      {/* HHP Dashboard Section */}
+      {!dashboardLoading && !dashboardError && dashboardData && (
+        <div className="px-4 mb-6">
+          <div className="max-w-md mx-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-blue-600" />
+                HHP Protocol Stats
+              </h2>
+              <Button
+                onClick={() => dashboardRefetch()}
+                variant="ghost"
+                size="sm"
+                className="text-blue-500 hover:text-blue-600"
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              <Card className="text-center p-3 bg-white/80 backdrop-blur-sm">
+                <div className="text-2xl font-bold text-blue-600">
+                  {dashboardData?.listingCreatedBasics?.length || 0}
+                </div>
+                <div className="text-xs text-gray-600">Listings</div>
+              </Card>
+              <Card className="text-center p-3 bg-white/80 backdrop-blur-sm">
+                <div className="text-2xl font-bold text-green-600">
+                  {dashboardData?.reservationCreateds?.length || 0}
+                </div>
+                <div className="text-xs text-gray-600">Reservations</div>
+              </Card>
+              <Card className="text-center p-3 bg-white/80 backdrop-blur-sm">
+                <div className="text-2xl font-bold text-purple-600">
+                  {dashboardData?.reservationFundeds?.length > 0
+                    ? formatUnits(
+                        dashboardData.reservationFundeds.reduce(
+                          (sum: bigint, fund: any) =>
+                            sum + BigInt(fund?.amount || "0"),
+                          BigInt(0)
+                        ),
+                        6 // pyUSD has 6 decimals
+                      ).slice(0, 6)
+                    : "0"}
+                </div>
+                <div className="text-xs text-gray-600">
+                  Total Funded (pyUSD)
+                </div>
+              </Card>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Bottom Navigation */}
       <BottomNavigation activeTab="Home" />

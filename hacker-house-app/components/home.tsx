@@ -349,8 +349,11 @@ export function Home() {
                           <span className="text-sm">{property.location}</span>
                         </div>
                         <div className="flex items-center gap-2 mb-3">
+                          <span className="text-xs font-normal text-gray-500 mr-1">
+                            pyUSD{" "}
+                          </span>
                           <span className="text-lg font-semibold">
-                            ${property.price}/Day
+                            {property.price}/Day
                           </span>
                           <span className="text-sm">★ {property.rating}</span>
                         </div>

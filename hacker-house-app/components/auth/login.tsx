@@ -24,16 +24,16 @@ export function Login() {
   return (
     <div className="min-h-screen flex flex-col max-w-md mx-auto relative">
       {/* Background Image */}
-      <div className="absolute inset-0 z-0">
+      <div className="absolute inset-0 z-0 bg-[#180149]">
         <Image
-          src="/image0.jpg"
+          src="/logo.png"
           alt="HackerHouse Background"
           fill
-          className="object-cover"
+          className="object-contain"
           priority
         />
         {/* Dark overlay for better text readability */}
-        <div className="absolute inset-0 bg-gray-900/80"></div>
+        {/* <div className="absolute inset-0 bg-gray-900/80"></div> */}
       </div>
 
       {/* Main Content */}

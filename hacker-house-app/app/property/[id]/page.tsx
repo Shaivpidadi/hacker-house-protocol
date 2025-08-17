@@ -495,9 +495,7 @@ export default function PropertyDetailPage() {
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
         <div className="max-w-md mx-auto flex items-center justify-between">
           <div>
-            <p className="text-lg font-semibold text-gray-900">
-              ${price}/night
-            </p>
+            <p className="text-lg font-semibold text-gray-900">{price}/night</p>
             <div className="flex items-center gap-1">
               <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
               <span className="text-sm text-gray-600">4.85 • HHP Verified</span>
