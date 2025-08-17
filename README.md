@@ -94,3 +94,4 @@ This isn't just another DeFi protocol. We're solving real problems that affect t
 *Built with ❤️ for the hackathon community*
 Twitter: x.com/hackerhousep
 
+Important Note: On the submission dashboard we got the following message: "Too many lines changed in a single commit", but this is because we merge 3 different repo (app, subgraph and Contracts) and turned this into one mono-repo for submission.
