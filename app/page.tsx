@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDashboardSummary } from "@/hooks/use-hhp-data";
 import { useEnhancedListingsWithIPFS } from "@/hooks/use-enhanced-listings";
 import { formatUnits } from "ethers";
@@ -31,6 +31,9 @@ function getFallbackIcon(icon: any) {
 
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState("Apartments");
+  const [currentPropertyIndex, setCurrentPropertyIndex] = useState(0);
+  const [swipeDirection, setSwipeDirection] = useState<string>("");
+  const [isSwiping, setIsSwiping] = useState(false);
   const { user, authenticated, ready } = usePrivy();
 
   // Fetch HHP dashboard data
@@ -87,6 +90,72 @@ export default function HomePage() {
     })) || [];
 
   console.log({ properties });
+
+  // Swipe functionality
+  const handleSwipe = (direction: "left" | "right") => {
+    if (direction === "left" && currentPropertyIndex < properties.length - 1) {
+      setCurrentPropertyIndex((prev) => prev + 1);
+    } else if (direction === "right" && currentPropertyIndex > 0) {
+      setCurrentPropertyIndex((prev) => prev - 1);
+    }
+    setSwipeDirection(direction);
+    setTimeout(() => setSwipeDirection(""), 300);
+  };
+
+  // Touch handlers for swipe
+  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(
+    null
+  );
+  const [touchEnd, setTouchEnd] = useState<{ x: number; y: number } | null>(
+    null
+  );
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchStart({
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY,
+    });
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd({
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY,
+    });
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+
+    const distanceX = touchStart.x - touchEnd.x;
+    const distanceY = touchStart.y - touchEnd.y;
+    const isHorizontalSwipe = Math.abs(distanceX) > Math.abs(distanceY);
+
+    if (isHorizontalSwipe && Math.abs(distanceX) > 50) {
+      if (distanceX > 0) {
+        handleSwipe("left"); // Swipe left = next property
+      } else {
+        handleSwipe("right"); // Swipe right = previous property
+      }
+    }
+
+    setTouchStart(null);
+    setTouchEnd(null);
+  };
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") {
+        handleSwipe("right"); // Previous property
+      } else if (e.key === "ArrowRight") {
+        handleSwipe("left"); // Next property
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [currentPropertyIndex, properties.length]);
 
   const categories = [
     { name: "Developers", active: true },
@@ -308,36 +377,60 @@ export default function HomePage() {
         {activeTab === "Apartments" && (
           <>
             {/* HHP Property Cards */}
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">HHP Listings</h2>
-              <Button
-                variant="ghost"
-                className="text-blue-500 font-medium hover:text-blue-600 transition-colors"
-                asChild
-              >
-                <Link href="/explore">View All</Link>
-              </Button>
-            </div>
-            <div className="space-y-4 mb-8">
+            <div className="mb-6">
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+                    HHP Listings
+                  </h2>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Discover verified blockchain properties
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  className="border-2 border-blue-500 text-blue-600 hover:bg-blue-50 font-medium px-6 py-2 rounded-xl transition-all duration-200 hover:scale-105"
+                  asChild
+                >
+                  <Link href="/explore">View All</Link>
+                </Button>
+              </div>
+
               {/* Loading State */}
               {listingsLoading && (
-                <div className="text-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-4"></div>
-                  <p className="text-muted-foreground">
+                <div className="text-center py-16">
+                  <div className="relative">
+                    <div className="w-16 h-16 border-4 border-blue-100 rounded-full mx-auto mb-4"></div>
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                  <p className="text-gray-600 font-medium">
                     Loading HHP listings...
+                  </p>
+                  <p className="text-sm text-gray-400 mt-2">
+                    Fetching from blockchain
                   </p>
                 </div>
               )}
 
               {/* Error State */}
               {listingsError && (
-                <div className="text-center py-12">
-                  <p className="text-destructive mb-4">
+                <div className="text-center py-16">
+                  <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Info className="w-8 h-8 text-red-500" />
+                  </div>
+                  <p className="text-red-600 font-semibold mb-2">
                     Error loading HHP listings
                   </p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-gray-500 mb-4">
                     Check your subgraph connection
                   </p>
+                  <Button
+                    variant="outline"
+                    className="border-red-200 text-red-600 hover:bg-red-50"
+                    onClick={() => window.location.reload()}
+                  >
+                    Try Again
+                  </Button>
                 </div>
               )}
 
@@ -345,87 +438,223 @@ export default function HomePage() {
               {!listingsLoading &&
                 !listingsError &&
                 properties.length === 0 && (
-                  <div className="text-center py-12">
-                    <Home className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">
+                  <div className="text-center py-16">
+                    <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Home className="w-10 h-10 text-gray-400" />
+                    </div>
+                    <p className="text-gray-600 font-medium mb-2">
                       No HHP listings found
                     </p>
-                    <p className="text-sm text-muted-foreground mt-2">
+                    <p className="text-sm text-gray-400 mb-4">
                       Check back later or visit the explore page
                     </p>
+                    <Button
+                      variant="outline"
+                      className="border-gray-200 text-gray-600 hover:bg-gray-50"
+                      asChild
+                    >
+                      <Link href="/explore">Explore Properties</Link>
+                    </Button>
                   </div>
                 )}
 
-              {/* Listings */}
-              {!listingsLoading &&
-                !listingsError &&
-                properties.length > 0 &&
-                properties.map((property: any) => (
-                  <Link
-                    key={property.id}
-                    href={`/property/${property?.hhpData?.listingId}`}
+              {/* TikTok/Tinder Style Single Property Frame */}
+              {!listingsLoading && !listingsError && properties.length > 0 && (
+                <div className="relative">
+                  {/* Main Property Frame - Full Screen Style */}
+                  <div
+                    className={`relative h-[80vh] max-h-[600px] bg-gradient-to-br from-gray-800 to-gray-900 rounded-3xl overflow-hidden shadow-2xl transition-transform duration-300 ${
+                      swipeDirection === "left"
+                        ? "transform -translate-x-full"
+                        : swipeDirection === "right"
+                        ? "transform translate-x-full"
+                        : ""
+                    }`}
+                    onTouchStart={onTouchStart}
+                    onTouchMove={onTouchMove}
+                    onTouchEnd={onTouchEnd}
                   >
-                    <Card className="relative overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] bg-white">
-                      <div className="relative h-64 bg-gradient-to-br from-gray-800 to-gray-600">
-                        <div className="absolute inset-0 bg-black/20"></div>
-                        <div className="absolute top-4 right-4 flex gap-2">
-                          <Button
-                            size="icon"
-                            variant="secondary"
-                            className="w-10 h-10 rounded-full bg-white/90 hover:bg-white transition-all duration-200 hover:scale-110"
-                          >
-                            <Heart className="w-5 h-5 text-green-500" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="secondary"
-                            className="w-10 h-10 rounded-full bg-white/90 hover:bg-white transition-all duration-200 hover:scale-110"
-                          >
-                            <Info className="w-5 h-5" />
-                          </Button>
+                    {/* Property Image Background */}
+                    <div
+                      className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                      style={{
+                        backgroundImage: `url(${
+                          properties[currentPropertyIndex]?.image ||
+                          "/property-palermo-1.png"
+                        })`,
+                      }}
+                    >
+                      {/* Dark Overlay for Text Readability */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20"></div>
+                    </div>
+
+                    {/* Top Action Buttons - Always Visible */}
+                    <div className="absolute top-6 right-6 flex flex-col gap-4">
+                      <Button
+                        size="icon"
+                        variant="secondary"
+                        className="w-14 h-14 rounded-full bg-white/95 hover:bg-white shadow-xl transition-all duration-200 hover:scale-110 border-0"
+                      >
+                        <Heart className="w-6 h-6 text-red-500" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="secondary"
+                        className="w-14 h-14 rounded-full bg-white/95 hover:bg-white shadow-xl transition-all duration-200 hover:scale-110 border-0"
+                      >
+                        <Info className="w-6 h-6 text-blue-600" />
+                      </Button>
+                    </div>
+
+                    {/* Price Badge - Top Left */}
+                    <div className="absolute top-6 left-6">
+                      <div className="bg-white/95 backdrop-blur-sm px-5 py-3 rounded-2xl shadow-xl border border-white/20">
+                        <div className="text-sm text-gray-600 font-medium">
+                          Price
                         </div>
-                        <div className="absolute bottom-4 left-4 right-4 text-white">
-                          <h3 className="text-xl font-semibold mb-1">
-                            {property.title}
-                          </h3>
-                          <div className="flex items-center gap-1 mb-2">
-                            <MapPin className="w-4 h-4" />
-                            <span className="text-sm">{property.location}</span>
-                          </div>
-                          <div className="flex items-center gap-2 mb-3">
-                            <span className="text-lg font-semibold">
-                              ${property.price}/Day
-                            </span>
-                            <div className="flex items-center gap-1">
-                              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                              <span className="text-sm">{property.rating}</span>
-                            </div>
-                          </div>
-                          <div className="flex flex-wrap gap-2">
-                            {property.amenities?.map(
-                              (amenity: any, index: number) => {
-                                const IconComponent = getFallbackIcon(
-                                  amenity?.icon
-                                );
-                                return (
-                                  <div
-                                    key={index}
-                                    className="flex items-center gap-1 px-3 py-1 bg-black/30 rounded-full text-xs backdrop-blur-sm"
-                                  >
-                                    <IconComponent className="w-3 h-3" />
-                                    <span>
-                                      {amenity?.name || `Amenity ${index + 1}`}
-                                    </span>
-                                  </div>
-                                );
-                              }
-                            )}
-                          </div>
+                        <div className="text-2xl font-bold text-green-600">
+                          ${properties[currentPropertyIndex]?.price || "89"}
+                          <span className="text-sm font-normal text-gray-500 ml-1">
+                            /day
+                          </span>
                         </div>
                       </div>
-                    </Card>
-                  </Link>
-                ))}
+                    </div>
+
+                    {/* Property Info - Bottom Overlay */}
+                    <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
+                      {/* Blockchain Verification Badge */}
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                        <span className="text-sm font-semibold text-green-300 bg-black/30 px-3 py-1 rounded-full">
+                          Blockchain Verified
+                        </span>
+                      </div>
+
+                      {/* Property Title */}
+                      <h2 className="text-4xl font-bold mb-3 text-shadow-lg">
+                        {properties[currentPropertyIndex]?.title ||
+                          "Room in Palermo"}
+                      </h2>
+
+                      {/* Location and Rating */}
+                      <div className="flex items-center gap-4 mb-6">
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-5 h-5 text-blue-200" />
+                          <span className="text-lg text-blue-100 font-medium">
+                            {properties[currentPropertyIndex]?.location ||
+                              "ETH Global Buenos Aires"}
+                          </span>
+                        </div>
+                        <div className="w-1 h-1 bg-blue-300 rounded-full"></div>
+                        <div className="flex items-center gap-2">
+                          <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                          <span className="text-lg text-yellow-100 font-semibold">
+                            {properties[currentPropertyIndex]?.rating || "4.85"}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Amenities Pills */}
+                      <div className="flex flex-wrap gap-3 mb-6">
+                        {properties[currentPropertyIndex]?.amenities
+                          ?.slice(0, 4)
+                          .map((amenity: any, index: number) => {
+                            const IconComponent = getFallbackIcon(
+                              amenity?.icon
+                            );
+                            return (
+                              <div
+                                key={index}
+                                className="flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sm border border-white/30 hover:bg-white/30 transition-all duration-200"
+                              >
+                                <IconComponent className="w-4 h-4 text-blue-200" />
+                                <span className="text-white font-medium">
+                                  {amenity?.name || `Feature ${index + 1}`}
+                                </span>
+                              </div>
+                            );
+                          })}
+                      </div>
+
+                      {/* Bottom Action Bar */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-blue-100/20 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/30">
+                            <Home className="w-6 h-6 text-blue-200" />
+                          </div>
+                          <div>
+                            <p className="text-sm text-blue-100 font-medium">
+                              HHP Protocol
+                            </p>
+                            <p className="text-xs text-blue-200">
+                              Smart Contract Verified
+                            </p>
+                          </div>
+                        </div>
+                        <Button
+                          size="lg"
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-2xl font-semibold text-lg transition-all duration-200 hover:scale-105 shadow-xl"
+                          asChild
+                        >
+                          <Link
+                            href={`/property/${properties[currentPropertyIndex]?.hhpData?.listingId}`}
+                          >
+                            View Details
+                          </Link>
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Navigation Dots */}
+                  <div className="flex justify-center mt-6 space-x-2">
+                    {properties.map((_: any, index: number) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentPropertyIndex(index)}
+                        className={`w-3 h-3 rounded-full transition-all duration-300 cursor-pointer hover:scale-110 ${
+                          index === currentPropertyIndex
+                            ? "bg-blue-600 w-8"
+                            : "bg-gray-300"
+                        }`}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Swipe Instructions and Navigation */}
+                  <div className="text-center mt-4 space-y-2">
+                    <p className="text-sm text-gray-500">
+                      Swipe left/right to explore more properties
+                    </p>
+                    <div className="flex justify-center gap-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleSwipe("right")}
+                        disabled={currentPropertyIndex === 0}
+                        className="px-4 py-2 text-sm"
+                      >
+                        ← Previous
+                      </Button>
+                      <span className="text-sm text-gray-500 py-2">
+                        {currentPropertyIndex + 1} of {properties.length}
+                      </span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleSwipe("left")}
+                        disabled={
+                          currentPropertyIndex === properties.length - 1
+                        }
+                        className="px-4 py-2 text-sm"
+                      >
+                        Next →
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </>
         )}

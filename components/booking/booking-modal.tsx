@@ -71,6 +71,9 @@ export function BookingModal({
   const totalCost = nights * parseFloat(formatUnits(nightlyRate || "0", 6));
   const costPerPerson = totalCost / Math.max(guests.length + 1, 1);
 
+  // Format nightly rate for display (6 decimal places)
+  const formattedNightlyRate = parseFloat(formatUnits(nightlyRate || "0", 6));
+
   // Calculate nights when dates change
   useEffect(() => {
     if (startDate && endDate) {
@@ -362,7 +365,7 @@ export function BookingModal({
                   <div className="flex justify-between text-sm">
                     <span>Rate per night:</span>
                     <span className="font-medium">
-                      ${parseFloat(nightlyRate).toFixed(2)}
+                      ${formattedNightlyRate.toFixed(2)}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
